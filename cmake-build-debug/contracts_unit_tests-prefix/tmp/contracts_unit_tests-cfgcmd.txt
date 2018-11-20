@@ -1,0 +1,1 @@
+cmd='/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake;-DCMAKE_BUILD_TYPE=Debug;-DCMAKE_FRAMEWORK_PATH=;-DCMAKE_MODULE_PATH=/usr/local/eosio.cdt/lib/cmake/eosio.cdt|/usr/local/eosio.cdt/lib/cmake/eosio.cdt;-DEOSIO_ROOT=;-GCodeBlocks - Unix Makefiles;<SOURCE_DIR><SOURCE_SUBDIR>'

@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 project(eosio_contracts VERSION 1.5.0)
+find_package(eosio.cdt)
 
 set(EOSIO_CDT_VERSION_MIN "1.4")
 set(EOSIO_CDT_VERSION_SOFT_MAX "1.4")
@@ -30,11 +31,11 @@ else()
 endif()
 
 
-add_subdirectory(eosio.bios)
-add_subdirectory(eosio.msig)
-add_subdirectory(eosio.wrap)
-add_subdirectory(eosio.system)
-add_subdirectory(eosio.token)
+add_subdirectory(celes.bios)
+add_subdirectory(celes.msig)
+add_subdirectory(celes.wrap)
+add_subdirectory(celesos.system)
+add_subdirectory(celes.token)
 
 if (APPLE)
    set(OPENSSL_ROOT "/usr/local/opt/openssl")

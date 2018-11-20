@@ -1,0 +1,60 @@
+Determining if the C compiler works failed with the following output:
+Change Dir: /Users/dickyang/Desktop/Data/celesos.contracts/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_31635/fast"
+/Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_31635.dir/build.make CMakeFiles/cmTC_31635.dir/build
+Building C object CMakeFiles/cmTC_31635.dir/testCCompiler.c.o
+/usr/local/eosio.cdt/bin/eosio-cc   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk   -o CMakeFiles/cmTC_31635.dir/testCCompiler.c.o   -c /Users/dickyang/Desktop/Data/celesos.contracts/cmake-build-debug/CMakeFiles/CMakeTmp/testCCompiler.c
+Linking C executable cmTC_31635
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_31635.dir/link.txt --verbose=1
+/usr/local/eosio.cdt/bin/eosio-cc   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_31635.dir/testCCompiler.c.o  -o cmTC_31635 
+clang-7: warning: CMakeFiles/cmTC_31635.dir/testCCompiler.c.o: 'linker' input unused [-Wunused-command-line-argument]
+clang-7: warning: -Wl,-search_paths_first: 'linker' input unused [-Wunused-command-line-argument]
+clang-7: warning: -Wl,-headerpad_max_install_names: 'linker' input unused [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-ffreestanding' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-fno-builtin' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-fno-threadsafe-statics' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-D BOOST_DISABLE_ASSERTS' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-D BOOST_EXCEPTION_DISABLE' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-Xclang -load' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-Xclang /usr/local/eosio.cdt/bin/LLVMEosioApply.dylib' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-fplugin=/usr/local/eosio.cdt/bin/eosio_plugin.dylib' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-mllvm -use-cfl-aa-in-codegen=both' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-I /usr/local/eosio.cdt/bin/../include/libcxx' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-I /usr/local/eosio.cdt/bin/../include/libc' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-I /usr/local/eosio.cdt/bin/../include' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-O3' [-Wunused-command-line-argument]
+make[1]: *** [cmTC_31635] Error 255
+make: *** [cmTC_31635/fast] Error 2
+
+
+Determining if the C compiler works failed with the following output:
+Change Dir: /Users/dickyang/Desktop/Data/celesos.contracts/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_28aa8/fast"
+/Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_28aa8.dir/build.make CMakeFiles/cmTC_28aa8.dir/build
+Building C object CMakeFiles/cmTC_28aa8.dir/testCCompiler.c.o
+/usr/local/eosio.cdt/bin/eosio-cc   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk   -o CMakeFiles/cmTC_28aa8.dir/testCCompiler.c.o   -c /Users/dickyang/Desktop/Data/celesos.contracts/cmake-build-debug/CMakeFiles/CMakeTmp/testCCompiler.c
+Linking C executable cmTC_28aa8
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_28aa8.dir/link.txt --verbose=1
+/usr/local/eosio.cdt/bin/eosio-cc   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_28aa8.dir/testCCompiler.c.o  -o cmTC_28aa8 
+clang-7: warning: CMakeFiles/cmTC_28aa8.dir/testCCompiler.c.o: 'linker' input unused [-Wunused-command-line-argument]
+clang-7: warning: -Wl,-search_paths_first: 'linker' input unused [-Wunused-command-line-argument]
+clang-7: warning: -Wl,-headerpad_max_install_names: 'linker' input unused [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-ffreestanding' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-fno-builtin' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-fno-threadsafe-statics' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-D BOOST_DISABLE_ASSERTS' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-D BOOST_EXCEPTION_DISABLE' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-Xclang -load' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-Xclang /usr/local/eosio.cdt/bin/LLVMEosioApply.dylib' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-fplugin=/usr/local/eosio.cdt/bin/eosio_plugin.dylib' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-mllvm -use-cfl-aa-in-codegen=both' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-I /usr/local/eosio.cdt/bin/../include/libcxx' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-I /usr/local/eosio.cdt/bin/../include/libc' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-I /usr/local/eosio.cdt/bin/../include' [-Wunused-command-line-argument]
+clang-7: warning: argument unused during compilation: '-O3' [-Wunused-command-line-argument]
+make[1]: *** [cmTC_28aa8] Error 255
+make: *** [cmTC_28aa8/fast] Error 2
+
+

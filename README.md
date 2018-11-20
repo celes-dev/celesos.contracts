@@ -1,4 +1,4 @@
-# eosio.contracts
+# celes.contracts
 
 ## Version : 1.5.0
 
@@ -6,12 +6,12 @@ The design of the EOSIO blockchain calls for a number of smart contracts that ar
 
 This repository contains examples of these privileged contracts that are useful when deploying, managing, and/or using an EOSIO blockchain.  They are provided for reference purposes:
 
-   * [eosio.system](https://github.com/eosio/eosio.contracts/tree/master/eosio.system)
-   * [eosio.msig](https://github.com/eosio/eosio.contracts/tree/master/eosio.msig)
-   * [eosio.wrap](https://github.com/eosio/eosio.contracts/tree/master/eosio.wrap)
+   * [celesos.system](https://github.com/eosio/celes.contracts/tree/master/celesos.system)
+   * [celes.msig](https://github.com/eosio/celes.contracts/tree/master/celes.msig)
+   * [celes.wrap](https://github.com/eosio/celes.contracts/tree/master/celes.wrap)
 
 The following unprivileged contract(s) are also part of the system.
-   * [eosio.token](https://github.com/eosio/eosio.contracts/tree/master/eosio.token)
+   * [celes.token](https://github.com/eosio/celes.contracts/tree/master/celes.token)
 
 Dependencies:
 * [eosio v1.4.x](https://github.com/EOSIO/eos/releases/tag/v1.4.3)
