@@ -31,11 +31,11 @@ else()
 endif()
 
 
-add_subdirectory(celes.bios)
-add_subdirectory(celes.msig)
-add_subdirectory(celes.wrap)
-add_subdirectory(celesos.system)
 add_subdirectory(celes.token)
+add_subdirectory(celesos.bios)
+add_subdirectory(celesos.msig)
+add_subdirectory(celesos.wrap)
+add_subdirectory(celesos.system)
 
 if (APPLE)
    set(OPENSSL_ROOT "/usr/local/opt/openssl")
@@ -44,4 +44,4 @@ elseif (UNIX)
 endif()
 set(SECP256K1_ROOT "/usr/local")
 
-include(UnitTestsExternalProject.txt)
+#include(UnitTestsExternalProject.txt)

@@ -7,8 +7,8 @@
 
 namespace celes {
 
-void token::create( eosio::name   issuer,
-                    eosio::asset  maximum_supply )
+void token::create(  eosio::name   issuer,
+                     eosio::asset  maximum_supply )
 {
     require_auth( _self );
 
@@ -29,7 +29,7 @@ void token::create( eosio::name   issuer,
 }
 
 
-void token::issue( eosio::name to, eosio::asset quantity, string memo )
+void token::issue(  eosio::name to,  eosio::asset quantity, string memo )
 {
     auto sym = quantity.symbol;
     eosio_assert( sym.is_valid(), "invalid symbol name" );
@@ -60,7 +60,7 @@ void token::issue( eosio::name to, eosio::asset quantity, string memo )
     }
 }
 
-void token::retire( eosio::asset quantity, string memo )
+void token::retire(  eosio::asset quantity, string memo )
 {
     auto sym = quantity.symbol;
     eosio_assert( sym.is_valid(), "invalid symbol name" );
@@ -84,9 +84,9 @@ void token::retire( eosio::asset quantity, string memo )
     sub_balance( st.issuer, quantity );
 }
 
-void token::transfer( eosio::name    from,
-                      eosio::name    to,
-                      eosio::asset   quantity,
+void token::transfer(  eosio::name    from,
+                       eosio::name    to,
+                       eosio::asset   quantity,
                       string  memo )
 {
     eosio_assert( from != to, "cannot transfer to self" );
@@ -110,7 +110,7 @@ void token::transfer( eosio::name    from,
     add_balance( to, quantity, payer );
 }
 
-void token::sub_balance( eosio::name owner, eosio::asset value ) {
+void token::sub_balance(  eosio::name owner,  eosio::asset value ) {
    accounts from_acnts( _self, owner.value );
 
    const auto& from = from_acnts.get( value.symbol.code().raw(), "no balance object found" );
@@ -121,7 +121,7 @@ void token::sub_balance( eosio::name owner, eosio::asset value ) {
       });
 }
 
-void token::add_balance( eosio::name owner, eosio::asset value, eosio::name ram_payer )
+void token::add_balance(  eosio::name owner,  eosio::asset value,  eosio::name ram_payer )
 {
    accounts to_acnts( _self, owner.value );
    auto to = to_acnts.find( value.symbol.code().raw() );
@@ -136,7 +136,7 @@ void token::add_balance( eosio::name owner, eosio::asset value, eosio::name ram_
    }
 }
 
-void token::open( eosio::name owner, const eosio::symbol& symbol, eosio::name ram_payer )
+void token::open(  eosio::name owner, const  eosio::symbol&  symbol,  eosio::name ram_payer )
 {
    require_auth( ram_payer );
 
@@ -155,7 +155,7 @@ void token::open( eosio::name owner, const eosio::symbol& symbol, eosio::name ra
    }
 }
 
-void token::close( eosio::name owner, const eosio::symbol& symbol )
+void token::close(  eosio::name owner, const  eosio::symbol&  symbol )
 {
    require_auth( owner );
    accounts acnts( _self, owner.value );

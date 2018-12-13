@@ -15,17 +15,16 @@
 #include <eosiolib/transaction.hpp>
 #include <celes.token/celes.token.hpp>
 
-#include <algorithm>
-#include <cmath>
+namespace celesos
+{
 
-namespace celesossystem {
-   using eosio::indexed_by;
-   using eosio::const_mem_fun;
-   using eosio::print;
-   using eosio::singleton;
-   using eosio::transaction;
+using eosio::const_mem_fun;
+using eosio::indexed_by;
+using eosio::print;
+using eosio::singleton;
+using eosio::transaction;
 
-   /**
+/**
     *  This method will create a producer_config and producer_info object for 'producer'
     *
     *  @pre producer is not already registered
@@ -33,377 +32,489 @@ namespace celesossystem {
     *  @pre authority of producer to register
     *
     */
-   void system_contract::regproducer( const name producer, const eosio::public_key& producer_key, const std::string& url, uint16_t location ) {
-      eosio_assert( url.size() < 512, "url too long" );
-      eosio_assert( producer_key != eosio::public_key(), "public key should not be the default value" );
-      require_auth( producer );
+void system_contract::regproducer(const name producer, const eosio::public_key &producer_key, const std::string &url, uint16_t location)
+{
+    eosio_assert(url.size() < 512, "url too long");
+    eosio_assert(producer_key != eosio::public_key(), "public key should not be the default value");
+    require_auth(producer);
 
-      auto prod = _producers.find( producer.value );
-      const auto ct = current_time_point();
+    auto prod = _producers.find(producer.value);
+    const auto ct = current_time_point();
 
-      if ( prod != _producers.end() ) {
-         _producers.modify( prod, producer, [&]( producer_info& info ){
+    if (prod != _producers.end())
+    {
+        _producers.modify(prod, producer, [&](producer_info &info) {
             info.producer_key = producer_key;
-            info.is_active    = true;
-            info.url          = url;
-            info.location     = location;
-            if ( info.last_claim_time == time_point() )
-               info.last_claim_time = ct;
-         });
-
-         auto prod2 = _producers2.find( producer.value );
-         if ( prod2 == _producers2.end() ) {
-            _producers2.emplace( producer, [&]( producer_info2& info ){
-               info.owner                     = producer;
-               info.last_votepay_share_update = ct;
-            });
-            update_total_votepay_share( ct, 0.0, prod->total_votes );
-            // When introducing the producer2 table row for the first time, the producer's votes must also be accounted for in the global total_producer_votepay_share at the same time.
-         }
-      } else {
-         _producers.emplace( producer, [&]( producer_info& info ){
-            info.owner           = producer;
-            info.total_votes     = 0;
-            info.producer_key    = producer_key;
-            info.is_active       = true;
-            info.url             = url;
-            info.location        = location;
+            info.is_active = true;
+            info.url = url;
+            info.location = location;
+            if (info.last_claim_time == eosio::time_point())
+                info.last_claim_time = ct;
+        });
+    }
+    else
+    {
+        _producers.emplace(producer, [&](producer_info &info) {
+            info.owner = producer;
+            info.total_votes = 0;
+            info.producer_key = producer_key;
+            info.is_active = true;
+            info.url = url;
+            info.location = location;
             info.last_claim_time = ct;
-         });
-         _producers2.emplace( producer, [&]( producer_info2& info ){
-            info.owner                     = producer;
-            info.last_votepay_share_update = ct;
-         });
-      }
+        });
+    }
+}
 
-   }
+void system_contract::unregprod(const name producer)
+{
+    require_auth(producer);
 
-   void system_contract::unregprod( const name producer ) {
-      require_auth( producer );
+    const auto &prod = _producers.get(producer.value, "producer not found");
+    _producers.modify(prod, eosio::same_payer, [&](producer_info &info) {
+        info.deactivate();
+    });
+}
 
-      const auto& prod = _producers.get( producer.value, "producer not found" );
-      _producers.modify( prod, same_payer, [&]( producer_info& info ){
-         info.deactivate();
-      });
-   }
+void system_contract::regdbp(const name dbpname)
+{
+    require_auth(dbps_account);
+    auto dbp = _dbps.find(dbpname.value);
+    eosio_assert(dbp != _dbps.end(), "dapp owner is exist.");
+    eosio_assert(cregdbp(dbpname.value), "dapp is not exist by this account.");
 
-   void system_contract::update_elected_producers( block_timestamp block_time ) {
-      _gstate.last_producer_schedule_update = block_time;
+    _dbps.emplace(dbpname, [&](dbp_info &info) {
+        info.owner = dbpname;
+        info.last_claim_time = current_time_point();
+    });
+}
 
-      auto idx = _producers.get_index<"prototalvote"_n>();
+void system_contract::unregdbp(const name dbpname)
+{
+    eosio_assert(has_auth(dbpname) || has_auth(dbps_account), "missing authority of ${account}/${permission}");
+    auto dbp = _dbps.find(dbpname.value);
+    eosio_assert(dbp != _dbps.end(), "dapp owner is not exist");
+    _dbps.erase(dbp);
+    cunregdbp(dbpname.value);
+}
 
-      std::vector< std::pair<eosio::producer_key,uint16_t> > top_producers;
-      top_producers.reserve(21);
+void system_contract::update_elected_producers(uint32_t head_block_number)
+{
 
-      for ( auto it = idx.cbegin(); it != idx.cend() && top_producers.size() < 21 && 0 < it->total_votes && it->active(); ++it ) {
-         top_producers.emplace_back( std::pair<eosio::producer_key,uint16_t>({{it->owner, it->producer_key}, it->location}) );
-      }
+    _gstate.last_producer_schedule_block = head_block_number;
 
-      if ( top_producers.size() < _gstate.last_producer_schedule_size ) {
-         return;
-      }
+    auto idx = _producers.get_index<"prototalvote"_n>();
 
-      /// sort by producer name
-      std::sort( top_producers.begin(), top_producers.end() );
+    std::vector<std::pair<eosio::producer_key, uint16_t>> top_producers;
+    top_producers.reserve(BP_COUNT);
 
-      std::vector<eosio::producer_key> producers;
+    for (auto it = idx.cbegin();
+         it != idx.cend() && top_producers.size() < BP_COUNT &&
+         0 < it->total_votes && it->active();
+         ++it)
+    {
+        top_producers.emplace_back(std::pair<eosio::producer_key, uint16_t>(
+            {{it->owner, it->producer_key}, it->location}));
+    }
 
-      producers.reserve(top_producers.size());
-      for( const auto& item : top_producers )
-         producers.push_back(item.first);
+    if (!_gstate.is_network_active)
+    {
+        if (top_producers.size() >= BP_COUNT)
+        {
+            _gstate.active_touch_count++;
+        }
+        else
+        {
+            _gstate.active_touch_count = 0;
+        }
 
-      auto packed_schedule = pack(producers);
+        if (_gstate.active_touch_count >= ACTIVE_NETWORK_CYCLE)
+        {
+            _gstate.is_network_active = true;
+        }
+    }
 
-      if( set_proposed_producers( packed_schedule.data(),  packed_schedule.size() ) >= 0 ) {
-         _gstate.last_producer_schedule_size = static_cast<decltype(_gstate.last_producer_schedule_size)>( top_producers.size() );
-      }
-   }
+    if (_gstate.is_network_active && top_producers.size() >= BP_COUNT)
+    {
+        /// sort by producer name
+        std::sort(top_producers.begin(), top_producers.end());
 
-   double stake2vote( int64_t staked ) {
-      /// TODO subtract 2080 brings the large numbers closer to this decade
-      double weight = int64_t( (now() - (block_timestamp::block_timestamp_epoch / 1000)) / (seconds_per_day * 7) )  / double( 52 );
-      return double(staked) * std::pow( 2, weight );
-   }
+        std::vector<eosio::producer_key> producers;
 
-   double system_contract::update_total_votepay_share( time_point ct,
-                                                       double additional_shares_delta,
-                                                       double shares_rate_delta )
-   {
-      double delta_total_votepay_share = 0.0;
-      if( ct > _gstate3.last_vpay_state_update ) {
-         delta_total_votepay_share = _gstate3.total_vpay_share_change_rate
-                                       * double( (ct - _gstate3.last_vpay_state_update).count() / 1E6 );
-      }
+        producers.reserve(top_producers.size());
+        for (const auto &item : top_producers)
+            producers.push_back(item.first);
 
-      delta_total_votepay_share += additional_shares_delta;
-      if( delta_total_votepay_share < 0 && _gstate2.total_producer_votepay_share < -delta_total_votepay_share ) {
-         _gstate2.total_producer_votepay_share = 0.0;
-      } else {
-         _gstate2.total_producer_votepay_share += delta_total_votepay_share;
-      }
+        auto packed_schedule = pack(producers);
+        
+        if (set_proposed_producers(packed_schedule.data(),
+                                   packed_schedule.size()) >= 0)
+        {
+            _gstate.last_producer_schedule_size =
+                static_cast<decltype(_gstate.last_producer_schedule_size)>(
+                    top_producers.size());
+        }
+    }
+}
 
-      if( shares_rate_delta < 0 && _gstate3.total_vpay_share_change_rate < -shares_rate_delta ) {
-         _gstate3.total_vpay_share_change_rate = 0.0;
-      } else {
-         _gstate3.total_vpay_share_change_rate += shares_rate_delta;
-      }
+void system_contract::setproxy(const name voter_name,
+                               const name proxy_name)
+{
+    require_auth(voter_name);
 
-      _gstate3.last_vpay_state_update = ct;
+    eosio_assert(voter_name != proxy_name, "can not set proxy to self");
 
-      return _gstate2.total_producer_votepay_share;
-   }
+    if (proxy_name)
+    {
+        require_recipient(proxy_name);
 
-   double system_contract::update_producer_votepay_share( const producers_table2::const_iterator& prod_itr,
-                                                          time_point ct,
-                                                          double shares_rate,
-                                                          bool reset_to_zero )
-   {
-      double delta_votepay_share = 0.0;
-      if( shares_rate > 0.0 && ct > prod_itr->last_votepay_share_update ) {
-         delta_votepay_share = shares_rate * double( (ct - prod_itr->last_votepay_share_update).count() / 1E6 ); // cannot be negative
-      }
+        auto new_proxy = _voters.find(proxy_name.value);
+        eosio_assert(new_proxy != _voters.end(), "invalid proxy specified");
+        eosio_assert(new_proxy->is_proxy, "proxy not found");
+    }
 
-      double new_votepay_share = prod_itr->votepay_share + delta_votepay_share;
-      _producers2.modify( prod_itr, same_payer, [&](auto& p) {
-         if( reset_to_zero )
-            p.votepay_share = 0.0;
-         else
-            p.votepay_share = new_votepay_share;
+    auto voter = _voters.find(voter_name.value);
+    eosio_assert(voter != _voters.end(), "voter is not found");
+    eosio_assert(voter->proxy != proxy_name, "action has no effect");
 
-         p.last_votepay_share_update = ct;
-      } );
+    _voters.modify(voter, eosio::same_payer, [&](auto &av) {
+        av.proxy = proxy_name;
+    });
+}
 
-      return new_votepay_share;
-   }
+void system_contract::voteproducer(const name voter_name,
+                                   const name wood_owner_name,
+                                   const std::string wood,
+                                   const uint32_t block_number,
+                                   const name producer_name)
+{
 
-   /**
-    *  @pre producers must be sorted from lowest to highest and must be registered and active
-    *  @pre if proxy is set then no producers can be voted for
-    *  @pre if proxy is set then proxy account must exist and be registered as a proxy
-    *  @pre every listed producer or proxy must have been previously registered
-    *  @pre voter must authorize this action
-    *  @pre voter must have previously staked some EOS for voting
-    *  @pre voter->staked must be up to date
-    *
-    *  @post every producer previously voted for will have vote reduced by previous vote weight
-    *  @post every producer newly voted for will have vote increased by new vote amount
-    *  @post prior proxy will proxied_vote_weight decremented by previous vote weight
-    *  @post new proxy will proxied_vote_weight incremented by new vote weight
-    *
-    *  If voting for a proxy, the producer votes will not change until the proxy updates their own vote.
-    */
-   void system_contract::voteproducer( const name voter_name, const name proxy, const std::vector<name>& producers ) {
-      require_auth( voter_name );
-      update_votes( voter_name, proxy, producers, true );
-   }
+    require_auth(voter_name);
+    system_contract::update_vote(voter_name, wood_owner_name, wood, block_number,
+                                 producer_name);
+}
 
-   void system_contract::update_votes( const name voter_name, const name proxy, const std::vector<name>& producers, bool voting ) {
-      //validate input
-      if ( proxy ) {
-         eosio_assert( producers.size() == 0, "cannot vote for producers and proxy at same time" );
-         eosio_assert( voter_name != proxy, "cannot proxy to self" );
-         require_recipient( proxy );
-      } else {
-         eosio_assert( producers.size() <= 30, "attempt to vote for too many producers" );
-         for( size_t i = 1; i < producers.size(); ++i ) {
-            eosio_assert( producers[i-1] < producers[i], "producer votes must be unique and sorted" );
-         }
-      }
+bool system_contract::verify(const std::string wood,
+                             const uint32_t block_number,
+                             const name wood_owner_name)
+{
+    auto woodkey = wood_burn_info::woodkey(wood);
+    auto idx = _burninfos.get_index<"wood"_n>();
 
-      auto voter = _voters.find( voter_name.value );
-      eosio_assert( voter != _voters.end(), "user must stake before they can vote" ); /// staking creates voter object
-      eosio_assert( !proxy || !voter->is_proxy, "account registered as a proxy is not allowed to use a proxy" );
+    auto itl = idx.lower_bound(woodkey);
+    auto itu = idx.upper_bound(woodkey);
 
-      /**
-       * The first time someone votes we calculate and set last_vote_weight, since they cannot unstake until
-       * after total_activated_stake hits threshold, we can use last_vote_weight to determine that this is
-       * their first vote and should consider their stake activated.
-       */
-      if( voter->last_vote_weight <= 0.0 ) {
-         _gstate.total_activated_stake += voter->staked;
-         if( _gstate.total_activated_stake >= min_activated_stake && _gstate.thresh_activated_stake_time == time_point() ) {
-            _gstate.thresh_activated_stake_time = current_time_point();
-         }
-      }
+    while (itl != itu)
+    {
+        if (itl->wood == wood && itl->block_number == block_number &&
+            itl->voter == wood_owner_name)
+        {
+            return false;
+        }
 
-      auto new_vote_weight = stake2vote( voter->staked );
-      if( voter->is_proxy ) {
-         new_vote_weight += voter->proxied_vote_weight;
-      }
+        itl++;
+    }
 
-      boost::container::flat_map<name, pair<double, bool /*new*/> > producer_deltas;
-      if ( voter->last_vote_weight > 0 ) {
-         if( voter->proxy ) {
-            auto old_proxy = _voters.find( voter->proxy.value );
-            eosio_assert( old_proxy != _voters.end(), "old proxy not found" ); //data corruption
-            _voters.modify( old_proxy, same_payer, [&]( auto& vp ) {
-                  vp.proxied_vote_weight -= voter->last_vote_weight;
-               });
-            propagate_weight_change( *old_proxy );
-         } else {
-            for( const auto& p : voter->producers ) {
-               auto& d = producer_deltas[p];
-               d.first -= voter->last_vote_weight;
-               d.second = false;
-            }
-         }
-      }
+    return verify_wood(block_number, wood_owner_name.value, wood.c_str());
+}
 
-      if( proxy ) {
-         auto new_proxy = _voters.find( proxy.value );
-         eosio_assert( new_proxy != _voters.end(), "invalid proxy specified" ); //if ( !voting ) { data corruption } else { wrong vote }
-         eosio_assert( !voting || new_proxy->is_proxy, "proxy not found" );
-         if ( new_vote_weight >= 0 ) {
-            _voters.modify( new_proxy, same_payer, [&]( auto& vp ) {
-                  vp.proxied_vote_weight += new_vote_weight;
-               });
-            propagate_weight_change( *new_proxy );
-         }
-      } else {
-         if( new_vote_weight >= 0 ) {
-            for( const auto& p : producers ) {
-               auto& d = producer_deltas[p];
-               d.first += new_vote_weight;
-               d.second = true;
-            }
-         }
-      }
+void system_contract::update_vote(const name voter_name,
+                                 const name wood_owner_name,
+                                 const std::string wood,
+                                 const uint32_t block_number,
+                                 const name producer_name)
+{
+    // validate input
+    eosio_assert(producer_name.value > 0, "cannot vote with no producer");
+    eosio_assert(wood.length() > 0, "invalid wood 2");
 
-      const auto ct = current_time_point();
-      double delta_change_rate         = 0.0;
-      double total_inactive_vpay_share = 0.0;
-      for( const auto& pd : producer_deltas ) {
-         auto pitr = _producers.find( pd.first.value );
-         if( pitr != _producers.end() ) {
-            eosio_assert( !voting || pitr->active() || !pd.second.second /* not from new set */, "producer is not currently registered" );
-            double init_total_votes = pitr->total_votes;
-            _producers.modify( pitr, same_payer, [&]( auto& p ) {
-               p.total_votes += pd.second.first;
-               if ( p.total_votes < 0 ) { // floating point arithmetics can give small negative numbers
-                  p.total_votes = 0;
-               }
-               _gstate.total_producer_vote_weight += pd.second.first;
-               //eosio_assert( p.total_votes >= 0, "something bad happened" );
+    if (wood_owner_name && voter_name != wood_owner_name)
+    {
+        auto wood_owner = _voters.find(wood_owner_name.value);
+        eosio_assert(wood_owner->proxy == voter_name, "cannot proxy for woodowner");
+        require_recipient(wood_owner_name);
+
+        auto voter = _voters.find(voter_name.value);
+        eosio_assert(voter != _voters.end() && voter->is_proxy,
+                     "voter is not a proxy");
+    }
+
+    auto &owner = wood_owner_name ? wood_owner_name : voter_name;
+    eosio_assert(system_contract::verify(wood, block_number, owner),
+                 "invalid wood 3");
+
+    // 更新producer总投票计数
+    auto &pitr =
+        _producers.get(producer_name.value, "producer not found"); // data corruption
+    eosio_assert(pitr.is_active, "producer is not active");
+
+    _producers.modify(pitr, eosio::same_payer, [&](auto &p) {
+        p.total_votes++;
+    });
+
+    _gstate.total_producer_vote_weight++;
+
+    // 增加投票明细记录
+    _burninfos.emplace(_self, [&](auto &burn) {
+        burn.rowid = _burninfos.available_primary_key();
+        burn.voter = owner;
+        burn.wood = wood;
+        burn.block_number = block_number;
+    });
+
+    // producer 统计
+    auto indexofproducer = _burnproducerstatinfos.get_index<"prodblock"_n>();
+
+    auto bpblockkey =
+        wood_burn_producer_block_stat::bpblockkey(producer_name, block_number);
+
+    auto itl = indexofproducer.lower_bound(bpblockkey);
+    auto itu = indexofproducer.upper_bound(bpblockkey);
+
+    if (itl != itu)
+    {
+        _burnproducerstatinfos.modify(*itl, eosio::same_payer, [&](auto &p) { p.stat++; });
+    }
+    else
+    {
+        _burnproducerstatinfos.emplace(_self, [&](auto &p) {
+            p.rowid = _burnproducerstatinfos.available_primary_key();
+            p.producer = producer_name;
+            p.block_number = block_number;
+            p.stat = 1;
+        });
+    }
+
+    {
+        auto temp = _burnblockstatinfos.find(block_number);
+        if (temp != _burnblockstatinfos.end())
+        {
+            _burnblockstatinfos.modify(temp, eosio::same_payer,
+                                       [&](auto &p) { p.stat = p.stat + 1; });
+        }
+        else
+        {
+            _burnblockstatinfos.emplace(_self, [&](auto &p) {
+                p.block_number = block_number;
+                p.stat = 1;
+                p.diff = 1;
             });
-            auto prod2 = _producers2.find( pd.first.value );
-            if( prod2 != _producers2.end() ) {
-               const auto last_claim_plus_3days = pitr->last_claim_time + microseconds(3 * useconds_per_day);
-               bool crossed_threshold       = (last_claim_plus_3days <= ct);
-               bool updated_after_threshold = (last_claim_plus_3days <= prod2->last_votepay_share_update);
-               // Note: updated_after_threshold implies cross_threshold
+        }
+    }
 
-               double new_votepay_share = update_producer_votepay_share( prod2,
-                                             ct,
-                                             updated_after_threshold ? 0.0 : init_total_votes,
-                                             crossed_threshold && !updated_after_threshold // only reset votepay_share once after threshold
-                                          );
+    // 记录总计投票数
+    _gstate.total_activated_stake++;
 
-               if( !crossed_threshold ) {
-                  delta_change_rate += pd.second.first;
-               } else if( !updated_after_threshold ) {
-                  total_inactive_vpay_share += new_votepay_share;
-                  delta_change_rate -= init_total_votes;
-               }
-            }
-         } else {
-            eosio_assert( !pd.second.second /* not from new set */, "producer is not registered" ); //data corruption
-         }
-      }
+    {
+        uint32_t head_block_number = get_chain_head_num();
 
-      update_total_votepay_share( ct, -total_inactive_vpay_share, delta_change_rate );
+        if (head_block_number > forest_period_number())
+        {
+            uint32_t max_clean_limit = 5;
+            uint32_t remain =
+                clean_dirty_stat_producers(head_block_number, max_clean_limit);
+            clean_dirty_wood_history(head_block_number, remain);
+        }
+    }
+}
 
-      _voters.modify( voter, same_payer, [&]( auto& av ) {
-         av.last_vote_weight = new_vote_weight;
-         av.producers = producers;
-         av.proxy     = proxy;
-      });
-   }
+/**
+     *  An account marked as a proxy can vote with the weight of other accounts
+ * which
+     *  have selected it as a proxy. Other accounts must refresh their
+ * voteproducer tosub total_voteru
+     *  update the proxy's weight.
+     *
+     *  @param isproxy - true if proxy wishes to vote on behalf of others, false
+ * otherwise
+     *  @pre proxy must have something staked (existing row in voters table)
+     *  @pre new state must be different than current state
+     */
+void system_contract::regproxy(const name proxy, bool isproxy)
+{
+    require_auth(proxy);
 
-   /**
-    *  An account marked as a proxy can vote with the weight of other accounts which
-    *  have selected it as a proxy. Other accounts must refresh their voteproducer to
-    *  update the proxy's weight.
-    *
-    *  @param isproxy - true if proxy wishes to vote on behalf of others, false otherwise
-    *  @pre proxy must have something staked (existing row in voters table)
-    *  @pre new state must be different than current state
-    */
-   void system_contract::regproxy( const name proxy, bool isproxy ) {
-      require_auth( proxy );
+    auto pitr = _voters.find(proxy.value);
+    if (pitr != _voters.end())
+    {
+        eosio_assert(isproxy != pitr->is_proxy, "action has no effect");
+        eosio_assert(!isproxy || !pitr->proxy,
+                     "account that uses a proxy is not allowed to become a proxy");
+        _voters.modify(pitr, eosio::same_payer, [&](auto &p) { p.is_proxy = isproxy; });
+    }
+    else
+    {
+        _voters.emplace(proxy, [&](auto &p) {
+            p.owner = proxy;
+            p.is_proxy = isproxy;
+        });
+    }
+}
 
-      auto pitr = _voters.find( proxy.value );
-      if ( pitr != _voters.end() ) {
-         eosio_assert( isproxy != pitr->is_proxy, "action has no effect" );
-         eosio_assert( !isproxy || !pitr->proxy, "account that uses a proxy is not allowed to become a proxy" );
-         _voters.modify( pitr, same_payer, [&]( auto& p ) {
-               p.is_proxy = isproxy;
-            });
-         propagate_weight_change( *pitr );
-      } else {
-         _voters.emplace( proxy, [&]( auto& p ) {
-               p.owner  = proxy;
-               p.is_proxy = isproxy;
-            });
-      }
-   }
+uint32_t system_contract::clean_dirty_stat_producers(uint32_t block_number,
+                                                     uint32_t maxline)
+{
 
-   void system_contract::propagate_weight_change( const voter_info& voter ) {
-      eosio_assert( !voter.proxy || !voter.is_proxy, "account registered as a proxy is not allowed to use a proxy" );
-      double new_weight = stake2vote( voter.staked );
-      if ( voter.is_proxy ) {
-         new_weight += voter.proxied_vote_weight;
-      }
+    if (block_number <= forest_period_number())
+        return 0;
 
-      /// don't propagate small changes (1 ~= epsilon)
-      if ( fabs( new_weight - voter.last_vote_weight ) > 1 )  {
-         if ( voter.proxy ) {
-            auto& proxy = _voters.get( voter.proxy.value, "proxy not found" ); //data corruption
-            _voters.modify( proxy, same_payer, [&]( auto& p ) {
-                  p.proxied_vote_weight += new_weight - voter.last_vote_weight;
-               }
-            );
-            propagate_weight_change( proxy );
-         } else {
-            auto delta = new_weight - voter.last_vote_weight;
-            const auto ct = current_time_point();
-            double delta_change_rate         = 0;
-            double total_inactive_vpay_share = 0;
-            for ( auto acnt : voter.producers ) {
-               auto& prod = _producers.get( acnt.value, "producer not found" ); //data corruption
-               const double init_total_votes = prod.total_votes;
-               _producers.modify( prod, same_payer, [&]( auto& p ) {
-                  p.total_votes += delta;
-                  _gstate.total_producer_vote_weight += delta;
-               });
-               auto prod2 = _producers2.find( acnt.value );
-               if ( prod2 != _producers2.end() ) {
-                  const auto last_claim_plus_3days = prod.last_claim_time + microseconds(3 * useconds_per_day);
-                  bool crossed_threshold       = (last_claim_plus_3days <= ct);
-                  bool updated_after_threshold = (last_claim_plus_3days <= prod2->last_votepay_share_update);
-                  // Note: updated_after_threshold implies cross_threshold
+    auto idx = _burnproducerstatinfos.get_index<"blocknumber"_n>();
+    auto itl = idx.begin();
+    auto itu = idx.lower_bound(block_number - forest_period_number());
 
-                  double new_votepay_share = update_producer_votepay_share( prod2,
-                                                ct,
-                                                updated_after_threshold ? 0.0 : init_total_votes,
-                                                crossed_threshold && !updated_after_threshold // only reset votepay_share once after threshold
-                                             );
+    std::vector<wood_burn_producer_block_stat> producer_stat_vector;
 
-                  if( !crossed_threshold ) {
-                     delta_change_rate += delta;
-                  } else if( !updated_after_threshold ) {
-                     total_inactive_vpay_share += new_votepay_share;
-                     delta_change_rate -= init_total_votes;
-                  }
-               }
+    uint32_t round = 0;
+    if (itl != itu)
+    {
+        for (auto it = itl; it != itu && round < maxline; ++it, ++round)
+        {
+            auto producer = _producers.find(it->producer.value);
+
+            if (producer != _producers.end())
+            {
+                _producers.modify(producer, eosio::same_payer, [&](auto &p) {
+                    p.total_votes = p.total_votes - it->stat;
+                });
             }
 
-            update_total_votepay_share( ct, -total_inactive_vpay_share, delta_change_rate );
-         }
-      }
-      _voters.modify( voter, same_payer, [&]( auto& v ) {
-            v.last_vote_weight = new_weight;
-         }
-      );
-   }
+            // delete record
+            producer_stat_vector.emplace_back(*it);
+        }
+    }
 
-} /// namespace celesossystem
+    for (auto temp : producer_stat_vector)
+    {
+        auto itr = _burnproducerstatinfos.find(temp.rowid);
+        if (itr != _burnproducerstatinfos.end())
+        {
+            _burnproducerstatinfos.erase(itr);
+        }
+    }
+
+    return maxline - round;
+}
+
+/**
+     * calc suggest diff
+     *
+     * @param block_number current block umber
+     * @return sugeest diff
+     */
+double system_contract::calc_diff(uint32_t block_number)
+{
+    auto last1 =
+        _burnblockstatinfos.find(block_number - (uint32_t)forest_space_number());
+    auto diff1 = ((last1 == _burnblockstatinfos.end()) ? 1 : last1->diff);
+    auto wood1 =
+        ((last1 == _burnblockstatinfos.end()) ? TARGET_WOOD_NUMBER : last1->stat);
+    auto last2 = _burnblockstatinfos.find(block_number -
+                                          2 * (uint32_t)forest_space_number());
+    auto diff2 = ((last2 == _burnblockstatinfos.end()) ? 1 : last2->diff);
+    auto wood2 =
+        ((last2 == _burnblockstatinfos.end()) ? TARGET_WOOD_NUMBER : last2->stat);
+    auto last3 = _burnblockstatinfos.find(block_number -
+                                          3 * (uint32_t)forest_space_number());
+    auto diff3 = ((last3 == _burnblockstatinfos.end()) ? 1 : last3->diff);
+    auto wood3 =
+        ((last3 == _burnblockstatinfos.end()) ? TARGET_WOOD_NUMBER : last3->stat);
+
+    // Suppose the last 3 cycle,the diff is diff1,diff2,diff2, and the answers
+    // count is wood1,wood2,wood3
+    // 假设历史三个周期难度分别为diff1,diff2,diff3,对应提交的答案数为wood1,wood2,wood3(1为距离当前时间最短的周期)
+    // so suggest diff
+    // is:wood1/M*diff1*4/7+wood1/M*diif2*2/7+wood1/M*diff3/7,Simplified to
+    // (wood1*diff1*4+wood2*diff2*2+wood3*diff3)/7/M
+    // 则建议难度值为wood1/M*diff1*4/7+wood1/M*diif2*2/7+wood1/M*diff3/7,简化为(wood1*diff1*4+wood2*diff2*2+wood3*diff3)/7/M
+    double targetdiff = (wood1 * diff1 * 4 + wood2 * diff2 * 2 + wood3 * diff3) / TARGET_WOOD_NUMBER / 7;
+    if (targetdiff <= .0001)
+    {
+        targetdiff = 0.0001;
+    }
+
+    auto current = _burnblockstatinfos.find(block_number);
+    if (current == _burnblockstatinfos.end())
+    {
+        // payer is the system account
+        _burnblockstatinfos.emplace(_self, [&](auto &p) {
+            p.block_number = block_number;
+            p.diff = targetdiff;
+            p.stat = 0;
+        });
+    }
+    else
+    {
+        _burnblockstatinfos.modify(current, eosio::same_payer,
+                                   [&](auto &p) { p.diff = targetdiff; });
+    }
+
+    return targetdiff;
+}
+
+void system_contract::clean_diff_stat_history(uint32_t block_number)
+{
+    auto itr = _burnblockstatinfos.begin();
+
+    std::vector<wood_burn_block_stat> stat_vector;
+
+    while (itr != _burnblockstatinfos.end())
+    {
+        if (itr->block_number + 3 * (uint32_t)forest_space_number() <
+            block_number)
+        {
+            stat_vector.emplace_back(*itr);
+            itr++;
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    for (auto temp : stat_vector)
+    {
+        auto temp2 = _burnblockstatinfos.find(temp.block_number);
+        if (temp2 != _burnblockstatinfos.end())
+        {
+            _burnblockstatinfos.erase(temp2);
+        }
+    }
+}
+
+uint32_t system_contract::clean_dirty_wood_history(uint32_t block_number,
+                                                   uint32_t maxline)
+{
+
+    auto idx = _burninfos.get_index<"blocknumber"_n>();
+    auto cust_itr = idx.begin();
+    uint32_t round = 0;
+
+    std::vector<wood_burn_info> wood_vector;
+    while (cust_itr != idx.end() && round < maxline)
+    {
+        if (cust_itr->block_number < block_number - forest_period_number())
+        {
+            // delete record
+            wood_vector.emplace_back(*cust_itr);
+            cust_itr++;
+            round++;
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    for (auto temp : wood_vector)
+    {
+        auto itr = _burninfos.find(temp.rowid);
+        if (itr != _burninfos.end())
+        {
+            _burninfos.erase(itr);
+        }
+    }
+
+    return maxline - round;
+}
+
+} // namespace celesos

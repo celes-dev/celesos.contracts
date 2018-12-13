@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(celes.msig VERSION 1.0.0)
+project(token_project VERSION 1.0.0)
 
 find_package(eosio.cdt)
 

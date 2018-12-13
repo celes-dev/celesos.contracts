@@ -33,6 +33,9 @@
         "optional": "cpp",
         "ratio": "cpp",
         "system_error": "cpp",
-        "vector": "cpp"
-    }
+        "vector": "cpp",
+        "istream": "cpp",
+        "variant": "cpp"
+    },
+    "C_Cpp.configurationWarnings": "Disabled"
 }

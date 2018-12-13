@@ -1,1 +1,0 @@
-/usr/local/eosio.cdt/bin/eosio-ld  CMakeFiles/celes.bios.wasm.dir/src/celes.bios.cpp.o -o celes.bios.wasm 
