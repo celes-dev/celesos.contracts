@@ -1503,7 +1503,7 @@ BOOST_FIXTURE_TEST_CASE(multiple_producer_pay, eosio_system_tester, * boost::uni
       const uint32_t initial_tot_unpaid_blocks = initial_global_state["total_unpaid_blocks"].as<uint32_t>();
       const asset    initial_supply            = get_token_supply();
       const asset    initial_bpay_balance      = get_balance(N(celes.bpay));
-      const asset    initial_vpay_balance      = get_balance(N(celes.vpay));
+      const asset    initial_wpay_balance      = get_balance(N(celes.wpay));
       const asset    initial_balance           = get_balance(prod_name);
       const uint32_t initial_unpaid_blocks     = get_producer_info(prod_name)["unpaid_blocks"].as<uint32_t>();
 
@@ -1517,7 +1517,7 @@ BOOST_FIXTURE_TEST_CASE(multiple_producer_pay, eosio_system_tester, * boost::uni
       const uint32_t tot_unpaid_blocks = global_state["total_unpaid_blocks"].as<uint32_t>();
       const asset    supply            = get_token_supply();
       const asset    bpay_balance      = get_balance(N(celes.bpay));
-      const asset    vpay_balance      = get_balance(N(celes.vpay));
+      const asset    wpay_balance      = get_balance(N(celes.wpay));
       const asset    balance           = get_balance(prod_name);
       const uint32_t unpaid_blocks     = get_producer_info(prod_name)["unpaid_blocks"].as<uint32_t>();
 
@@ -1543,7 +1543,7 @@ BOOST_FIXTURE_TEST_CASE(multiple_producer_pay, eosio_system_tester, * boost::uni
       } else {
          BOOST_REQUIRE( within_one( from_perblock_bucket, balance.get_amount() - initial_balance.get_amount() ) );
          BOOST_REQUIRE( within_one( expected_pervote_bucket, pervote_bucket ) );
-         BOOST_REQUIRE( within_one( expected_pervote_bucket, vpay_balance.get_amount() ) );
+         BOOST_REQUIRE( within_one( expected_pervote_bucket, wpay_balance.get_amount() ) );
          BOOST_REQUIRE( within_one( perblock_bucket, bpay_balance.get_amount() ) );
       }
 
@@ -1579,7 +1579,7 @@ BOOST_FIXTURE_TEST_CASE(multiple_producer_pay, eosio_system_tester, * boost::uni
       const uint32_t initial_tot_unpaid_blocks = initial_global_state["total_unpaid_blocks"].as<uint32_t>();
       const asset    initial_supply            = get_token_supply();
       const asset    initial_bpay_balance      = get_balance(N(celes.bpay));
-      const asset    initial_vpay_balance      = get_balance(N(celes.vpay));
+      const asset    initial_wpay_balance      = get_balance(N(celes.wpay));
       const asset    initial_balance           = get_balance(prod_name);
       const uint32_t initial_unpaid_blocks     = get_producer_info(prod_name)["unpaid_blocks"].as<uint32_t>();
 
@@ -1593,7 +1593,7 @@ BOOST_FIXTURE_TEST_CASE(multiple_producer_pay, eosio_system_tester, * boost::uni
       const uint32_t tot_unpaid_blocks = global_state["total_unpaid_blocks"].as<uint32_t>();
       const asset    supply            = get_token_supply();
       const asset    bpay_balance      = get_balance(N(celes.bpay));
-      const asset    vpay_balance      = get_balance(N(celes.vpay));
+      const asset    wpay_balance      = get_balance(N(celes.wpay));
       const asset    balance           = get_balance(prod_name);
       const uint32_t unpaid_blocks     = get_producer_info(prod_name)["unpaid_blocks"].as<uint32_t>();
 
@@ -1614,7 +1614,7 @@ BOOST_FIXTURE_TEST_CASE(multiple_producer_pay, eosio_system_tester, * boost::uni
       if (from_pervote_bucket >= 100 * 10000) {
          BOOST_REQUIRE( within_one( from_perblock_bucket + from_pervote_bucket, balance.get_amount() - initial_balance.get_amount() ) );
          BOOST_REQUIRE( within_one( expected_pervote_bucket - from_pervote_bucket, pervote_bucket ) );
-         BOOST_REQUIRE( within_one( expected_pervote_bucket - from_pervote_bucket, vpay_balance.get_amount() ) );
+         BOOST_REQUIRE( within_one( expected_pervote_bucket - from_pervote_bucket, wpay_balance.get_amount() ) );
          BOOST_REQUIRE( within_one( expected_perblock_bucket - from_perblock_bucket, perblock_bucket ) );
          BOOST_REQUIRE( within_one( expected_perblock_bucket - from_perblock_bucket, bpay_balance.get_amount() ) );
       } else {
@@ -1705,8 +1705,8 @@ BOOST_FIXTURE_TEST_CASE(multiple_producer_pay, eosio_system_tester, * boost::uni
       const auto     initial_prod_info2        = get_producer_info2(prod_name);
       const auto     initial_global_state      = get_global_state();
       const double   initial_tot_votepay_share = get_global_state2()["total_producer_votepay_share"].as_double();
-      const double   initial_tot_vpay_rate     = get_global_state3()["total_vpay_share_change_rate"].as_double();
-      const uint64_t initial_vpay_state_update = microseconds_since_epoch_of_iso_string( get_global_state3()["last_vpay_state_update"] );
+      const double   initial_tot_wpay_rate     = get_global_state3()["total_wpay_share_change_rate"].as_double();
+      const uint64_t initial_wpay_state_update = microseconds_since_epoch_of_iso_string( get_global_state3()["last_wpay_state_update"] );
       const uint64_t initial_bucket_fill_time  = microseconds_since_epoch_of_iso_string( initial_global_state["last_pervote_bucket_fill"] );
       const int64_t  initial_pervote_bucket    = initial_global_state["pervote_bucket"].as<int64_t>();
       const int64_t  initial_perblock_bucket   = initial_global_state["perblock_bucket"].as<int64_t>();
@@ -1723,7 +1723,7 @@ BOOST_FIXTURE_TEST_CASE(multiple_producer_pay, eosio_system_tester, * boost::uni
       const auto     prod_info         = get_producer_info(prod_name);
       const auto     prod_info2        = get_producer_info2(prod_name);
       const auto     global_state      = get_global_state();
-      const uint64_t vpay_state_update = microseconds_since_epoch_of_iso_string( get_global_state3()["last_vpay_state_update"] );
+      const uint64_t wpay_state_update = microseconds_since_epoch_of_iso_string( get_global_state3()["last_wpay_state_update"] );
       const uint64_t bucket_fill_time  = microseconds_since_epoch_of_iso_string( global_state["last_pervote_bucket_fill"] );
       const int64_t  pervote_bucket    = global_state["pervote_bucket"].as<int64_t>();
       const int64_t  perblock_bucket   = global_state["perblock_bucket"].as<int64_t>();
@@ -1735,10 +1735,10 @@ BOOST_FIXTURE_TEST_CASE(multiple_producer_pay, eosio_system_tester, * boost::uni
       const uint64_t prod_update_time  = microseconds_since_epoch_of_iso_string( prod_info2["last_votepay_share_update"] );
 
       const uint64_t usecs_between_fills         = bucket_fill_time - initial_bucket_fill_time;
-      const double   secs_between_global_updates = (vpay_state_update - initial_vpay_state_update) / 1E6;
+      const double   secs_between_global_updates = (wpay_state_update - initial_wpay_state_update) / 1E6;
       const double   secs_between_prod_updates   = (prod_update_time - initial_prod_update_time) / 1E6;
       const double   votepay_share               = initial_prod_info2["votepay_share"].as_double() + secs_between_prod_updates * prod_info["total_votes"].as_double();
-      const double   tot_votepay_share           = initial_tot_votepay_share + initial_tot_vpay_rate * secs_between_global_updates;
+      const double   tot_votepay_share           = initial_tot_votepay_share + initial_tot_wpay_rate * secs_between_global_updates;
 
       const int64_t expected_perblock_bucket = int64_t( double(initial_supply.get_amount()) * double(usecs_between_fills) * (0.25 * cont_rate/ 5.) / usecs_per_year )
          + initial_perblock_bucket;
@@ -1749,7 +1749,7 @@ BOOST_FIXTURE_TEST_CASE(multiple_producer_pay, eosio_system_tester, * boost::uni
 
       const double expected_supply_growth = initial_supply.get_amount() * double(usecs_between_fills) * cont_rate / usecs_per_year;
       BOOST_REQUIRE_EQUAL( int64_t(expected_supply_growth), supply.get_amount() - initial_supply.get_amount() );
-      BOOST_REQUIRE_EQUAL( claim_time, vpay_state_update );
+      BOOST_REQUIRE_EQUAL( claim_time, wpay_state_update );
       BOOST_REQUIRE( 100 * 10000 < from_pervote_bucket );
       BOOST_CHECK_EQUAL( expected_pervote_bucket - from_pervote_bucket, pervote_bucket );
       BOOST_CHECK_EQUAL( from_perblock_bucket + from_pervote_bucket, balance.get_amount() - initial_balance.get_amount() );
@@ -1810,7 +1810,7 @@ BOOST_FIXTURE_TEST_CASE(multiple_producer_votepay_share, eosio_system_tester, * 
    // producvoterc votes for defproducera ... defproducerz
    // producvoterd votes for abcproducera ... abcproducern
    {
-      BOOST_TEST_REQUIRE( 0 == get_global_state3()["total_vpay_share_change_rate"].as_double() );
+      BOOST_TEST_REQUIRE( 0 == get_global_state3()["total_wpay_share_change_rate"].as_double() );
       BOOST_REQUIRE_EQUAL( success(), vote(N(producvotera), vector<account_name>(producer_names.begin(), producer_names.begin()+10)) );
       produce_block( fc::hours(10) );
       BOOST_TEST_REQUIRE( 0 == get_global_state2()["total_producer_votepay_share"].as_double() );
@@ -1860,9 +1860,9 @@ BOOST_FIXTURE_TEST_CASE(multiple_producer_votepay_share, eosio_system_tester, * 
          total_votes += vote_shares[i];
       }
       BOOST_TEST_REQUIRE( total_votes == get_global_state()["total_producer_vote_weight"].as_double() );
-      BOOST_TEST_REQUIRE( total_votes == get_global_state3()["total_vpay_share_change_rate"].as_double() );
+      BOOST_TEST_REQUIRE( total_votes == get_global_state3()["total_wpay_share_change_rate"].as_double() );
       BOOST_REQUIRE_EQUAL( microseconds_since_epoch_of_iso_string( get_producer_info2(producer_names.back())["last_votepay_share_update"] ),
-                           microseconds_since_epoch_of_iso_string( get_global_state3()["last_vpay_state_update"] ) );
+                           microseconds_since_epoch_of_iso_string( get_global_state3()["last_wpay_state_update"] ) );
 
       std::for_each( vote_shares.begin(), vote_shares.end(), [total_votes](double& x) { x /= total_votes; } );
       BOOST_TEST_REQUIRE( double(1) == std::accumulate(vote_shares.begin(), vote_shares.end(), double(0)) );
@@ -1882,7 +1882,7 @@ BOOST_FIXTURE_TEST_CASE(multiple_producer_votepay_share, eosio_system_tester, * 
          total_votepay_shares          += votepay_shares[i];
          expected_total_votepay_shares += votepay_shares[i];
          expected_total_votepay_shares += info["total_votes"].as_double()
-                                           * double( ( microseconds_since_epoch_of_iso_string( gs3["last_vpay_state_update"] )
+                                           * double( ( microseconds_since_epoch_of_iso_string( gs3["last_wpay_state_update"] )
                                                         - microseconds_since_epoch_of_iso_string( info2["last_votepay_share_update"] )
                                                      ) / 1E6 );
       }
@@ -1904,7 +1904,7 @@ BOOST_FIXTURE_TEST_CASE(multiple_producer_votepay_share, eosio_system_tester, * 
       BOOST_REQUIRE_EQUAL( get_producer_info(prod_name)["last_claim_time"].as_string(),
                            get_producer_info2(prod_name)["last_votepay_share_update"].as_string() );
       BOOST_REQUIRE_EQUAL( get_producer_info(prod_name)["last_claim_time"].as_string(),
-                           get_global_state3()["last_vpay_state_update"].as_string() );
+                           get_global_state3()["last_wpay_state_update"].as_string() );
       const auto& gs3 = get_global_state3();
       double expected_total_votepay_shares = 0;
       for (uint32_t i = 0; i < producer_names.size(); ++i) {
@@ -1912,7 +1912,7 @@ BOOST_FIXTURE_TEST_CASE(multiple_producer_votepay_share, eosio_system_tester, * 
          const auto& info2 = get_producer_info2(producer_names[i]);
          expected_total_votepay_shares += info2["votepay_share"].as_double();
          expected_total_votepay_shares += info["total_votes"].as_double()
-                                           * double( ( microseconds_since_epoch_of_iso_string( gs3["last_vpay_state_update"] )
+                                           * double( ( microseconds_since_epoch_of_iso_string( gs3["last_wpay_state_update"] )
                                                         - microseconds_since_epoch_of_iso_string( info2["last_votepay_share_update"] )
                                                      ) / 1E6 );
       }
@@ -1980,12 +1980,12 @@ BOOST_FIXTURE_TEST_CASE(votepay_share_invariant, eosio_system_tester, * boost::u
    const auto& gs2   = get_global_state2();
    const auto& gs3   = get_global_state3();
 
-   double expected_total_vpay_share = info2["votepay_share"].as_double()
+   double expected_total_wpay_share = info2["votepay_share"].as_double()
                                        + info["total_votes"].as_double()
-                                          * ( microseconds_since_epoch_of_iso_string( gs3["last_vpay_state_update"] )
+                                          * ( microseconds_since_epoch_of_iso_string( gs3["last_wpay_state_update"] )
                                                - microseconds_since_epoch_of_iso_string( info2["last_votepay_share_update"] ) ) / 1E6;
 
-   BOOST_TEST_REQUIRE( expected_total_vpay_share == gs2["total_producer_votepay_share"].as_double() );
+   BOOST_TEST_REQUIRE( expected_total_wpay_share == gs2["total_producer_votepay_share"].as_double() );
 
 } FC_LOG_AND_RETHROW()
 
@@ -2071,10 +2071,10 @@ BOOST_FIXTURE_TEST_CASE(votepay_share_proxy, eosio_system_tester, * boost::unit_
    total_votes = get_producer_info(carol)["total_votes"].as_double();
    BOOST_REQUIRE_EQUAL( success(), vote( bob, { carol } ) );
    BOOST_REQUIRE_EQUAL( get_producer_info2(carol)["last_votepay_share_update"].as_string(),
-                        get_global_state3()["last_vpay_state_update"].as_string() );
+                        get_global_state3()["last_wpay_state_update"].as_string() );
    BOOST_TEST_REQUIRE( 0 == get_producer_info2(carol)["votepay_share"].as_double() );
    BOOST_TEST_REQUIRE( 0 == get_global_state2()["total_producer_votepay_share"].as_double() );
-   BOOST_TEST_REQUIRE( 0 == get_global_state3()["total_vpay_share_change_rate"].as_double() );
+   BOOST_TEST_REQUIRE( 0 == get_global_state3()["total_wpay_share_change_rate"].as_double() );
 
    produce_block( fc::hours(20) );
 
@@ -2082,10 +2082,10 @@ BOOST_FIXTURE_TEST_CASE(votepay_share_proxy, eosio_system_tester, * boost::unit_
    // carol still hasn't claimed rewards
    BOOST_REQUIRE_EQUAL( success(), vote( bob, { carol } ) );
    BOOST_REQUIRE_EQUAL(get_producer_info2(carol)["last_votepay_share_update"].as_string(),
-                       get_global_state3()["last_vpay_state_update"].as_string() );
+                       get_global_state3()["last_wpay_state_update"].as_string() );
    BOOST_TEST_REQUIRE( 0 == get_producer_info2(carol)["votepay_share"].as_double() );
    BOOST_TEST_REQUIRE( 0 == get_global_state2()["total_producer_votepay_share"].as_double() );
-   BOOST_TEST_REQUIRE( 0 == get_global_state3()["total_vpay_share_change_rate"].as_double() );
+   BOOST_TEST_REQUIRE( 0 == get_global_state3()["total_wpay_share_change_rate"].as_double() );
 
    produce_block( fc::hours(24) );
 
@@ -2093,7 +2093,7 @@ BOOST_FIXTURE_TEST_CASE(votepay_share_proxy, eosio_system_tester, * boost::unit_
    BOOST_REQUIRE_EQUAL( success(), push_action( carol, N(claimrewards), mvo()("owner", carol) ) );
    BOOST_TEST_REQUIRE( 0           == get_producer_info2(carol)["votepay_share"].as_double() );
    BOOST_TEST_REQUIRE( 0           == get_global_state2()["total_producer_votepay_share"].as_double() );
-   BOOST_TEST_REQUIRE( total_votes == get_global_state3()["total_vpay_share_change_rate"].as_double() );
+   BOOST_TEST_REQUIRE( total_votes == get_global_state3()["total_wpay_share_change_rate"].as_double() );
 
    produce_block( fc::hours(5) );
 
@@ -2109,11 +2109,11 @@ BOOST_FIXTURE_TEST_CASE(votepay_share_proxy, eosio_system_tester, * boost::unit_
    BOOST_TEST_REQUIRE( 0                      == cur_info2_emily["votepay_share"].as_double() );
    BOOST_TEST_REQUIRE( expected_votepay_share == get_global_state2()["total_producer_votepay_share"].as_double() );
    BOOST_TEST_REQUIRE( get_producer_info(carol)["total_votes"].as_double() ==
-                       get_global_state3()["total_vpay_share_change_rate"].as_double() );
+                       get_global_state3()["total_wpay_share_change_rate"].as_double() );
    BOOST_REQUIRE_EQUAL( cur_info2["last_votepay_share_update"].as_string(),
-                        get_global_state3()["last_vpay_state_update"].as_string() );
+                        get_global_state3()["last_wpay_state_update"].as_string() );
    BOOST_REQUIRE_EQUAL( cur_info2_emily["last_votepay_share_update"].as_string(),
-                        get_global_state3()["last_vpay_state_update"].as_string() );
+                        get_global_state3()["last_wpay_state_update"].as_string() );
 
    produce_block( fc::hours(10) );
 
@@ -2129,11 +2129,11 @@ BOOST_FIXTURE_TEST_CASE(votepay_share_proxy, eosio_system_tester, * boost::unit_
    BOOST_TEST_REQUIRE( 0                      == cur_info2_emily["votepay_share"].as_double() );
    BOOST_TEST_REQUIRE( expected_votepay_share == get_global_state2()["total_producer_votepay_share"].as_double() );
    BOOST_TEST_REQUIRE( get_producer_info(carol)["total_votes"].as_double() ==
-                       get_global_state3()["total_vpay_share_change_rate"].as_double() );
+                       get_global_state3()["total_wpay_share_change_rate"].as_double() );
    BOOST_REQUIRE_EQUAL( cur_info2["last_votepay_share_update"].as_string(),
-                        get_global_state3()["last_vpay_state_update"].as_string() );
+                        get_global_state3()["last_wpay_state_update"].as_string() );
    BOOST_REQUIRE_EQUAL( cur_info2_emily["last_votepay_share_update"].as_string(),
-                        get_global_state3()["last_vpay_state_update"].as_string() );
+                        get_global_state3()["last_wpay_state_update"].as_string() );
 
 } FC_LOG_AND_RETHROW()
 
@@ -2196,13 +2196,13 @@ BOOST_FIXTURE_TEST_CASE(votepay_share_update_order, eosio_system_tester, * boost
    const auto& emily_info  = get_producer_info(emily);
    const auto& emily_info2 = get_producer_info2(emily);
    const auto& gs3         = get_global_state3();
-   BOOST_REQUIRE_EQUAL( carol_info2["last_votepay_share_update"].as_string(), gs3["last_vpay_state_update"].as_string() );
-   BOOST_REQUIRE_EQUAL( emily_info2["last_votepay_share_update"].as_string(), gs3["last_vpay_state_update"].as_string() );
+   BOOST_REQUIRE_EQUAL( carol_info2["last_votepay_share_update"].as_string(), gs3["last_wpay_state_update"].as_string() );
+   BOOST_REQUIRE_EQUAL( emily_info2["last_votepay_share_update"].as_string(), gs3["last_wpay_state_update"].as_string() );
    BOOST_TEST_REQUIRE( 0  == carol_info2["votepay_share"].as_double() );
    BOOST_TEST_REQUIRE( 0  == emily_info2["votepay_share"].as_double() );
    BOOST_REQUIRE( 0 < carol_info["total_votes"].as_double() );
    BOOST_TEST_REQUIRE( carol_info["total_votes"].as_double() == emily_info["total_votes"].as_double() );
-   BOOST_TEST_REQUIRE( gs3["total_vpay_share_change_rate"].as_double() == 2 * carol_info["total_votes"].as_double() );
+   BOOST_TEST_REQUIRE( gs3["total_wpay_share_change_rate"].as_double() == 2 * carol_info["total_votes"].as_double() );
 
 } FC_LOG_AND_RETHROW()
 
@@ -2338,13 +2338,13 @@ BOOST_AUTO_TEST_CASE(votepay_transition2, * boost::unit_test::tolerance(1e-10)) 
 
    BOOST_REQUIRE_EQUAL( t.success(), t.push_action(producer_names[0], N(claimrewards), mvo()("owner", producer_names[0])) );
    BOOST_TEST_REQUIRE( 0 == t.get_global_state2()["total_producer_votepay_share"].as_double() );
-   BOOST_TEST_REQUIRE( t.get_producer_info(producer_names[0])["total_votes"].as_double() == t.get_global_state3()["total_vpay_share_change_rate"].as_double() );
+   BOOST_TEST_REQUIRE( t.get_producer_info(producer_names[0])["total_votes"].as_double() == t.get_global_state3()["total_wpay_share_change_rate"].as_double() );
 
    t.produce_block( fc::hours(5) );
 
    BOOST_REQUIRE_EQUAL( t.success(), t.regproducer(producer_names[1]) );
    BOOST_TEST_REQUIRE( t.get_producer_info(producer_names[0])["total_votes"].as_double() + t.get_producer_info(producer_names[1])["total_votes"].as_double() ==
-                       t.get_global_state3()["total_vpay_share_change_rate"].as_double() );
+                       t.get_global_state3()["total_wpay_share_change_rate"].as_double() );
 
 } FC_LOG_AND_RETHROW()
 

@@ -78,7 +78,7 @@ void system_contract::unregprod(const name producer)
 
 void system_contract::regdbp(const name dbpname)
 {
-    require_auth(dbps_account);
+    require_auth(dbp_account);
     auto dbp = _dbps.find(dbpname.value);
     eosio_assert(dbp != _dbps.end(), "dapp owner is exist.");
     eosio_assert(cregdbp(dbpname.value), "dapp is not exist by this account.");
@@ -91,7 +91,7 @@ void system_contract::regdbp(const name dbpname)
 
 void system_contract::unregdbp(const name dbpname)
 {
-    eosio_assert(has_auth(dbpname) || has_auth(dbps_account), "missing authority of ${account}/${permission}");
+    eosio_assert(has_auth(dbpname) || has_auth(dbp_account), "missing authority of ${account}/${permission}");
     auto dbp = _dbps.find(dbpname.value);
     eosio_assert(dbp != _dbps.end(), "dapp owner is not exist");
     _dbps.erase(dbp);

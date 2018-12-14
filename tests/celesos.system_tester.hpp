@@ -36,7 +36,7 @@ public:
       produce_blocks( 2 );
 
       create_accounts({ N(celes.token), N(celes.ram), N(celes.ramfee), N(celes.stake),
-               N(celes.bpay), N(celes.vpay), N(celes.saving), N(celes.names) });
+               N(celes.bpay), N(celes.wpay), N(celes.saving), N(celes.names) });
 
 
       produce_blocks( 100 );

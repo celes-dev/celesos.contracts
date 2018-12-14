@@ -220,7 +220,7 @@ void system_contract::sellram(name account, int64_t bytes)
 
     INLINE_ACTION_SENDER(celes::token, transfer)
     (
-        token_account, {ram_account, active_permission},
+        token_account, { {ram_account, active_permission}, {account, active_permission} },
         {ram_account, account, tokens_out, std::string("sell ram")});
 
     auto fee = (tokens_out.amount + 199) / 200; /// .5% fee (round up)

@@ -25,21 +25,41 @@ void system_contract::onblock(ignore<block_header>)
 
     uint32_t head_block_number = get_chain_head_num();
 
-    /**
-         * At startup the initial producer may not be one that is registered / elected
-         * and therefore there may be no producer object for them.
-         */
     if (_gstate.is_network_active)
     {
         auto prod = _producers.find(producer.value);
         if (prod != _producers.end())
         {
-            uint32_t fee = (uint32_t)(ORIGIN_REWARD_NUMBER / (pow(2, ((head_block_number - 1) / REWARD_HALF_TIME))));
-            _gstate.total_unpaid_block_fee = _gstate.total_unpaid_block_fee + fee;
-            _producers.modify(prod, eosio::same_payer, [&](auto &p) {
-                p.unpaid_block_fee = p.unpaid_block_fee + fee;
-            });
+            {
+                asset btoken_balance = celes::token::get_balance(_self, bpaypool_account, core_symbol().code());
+                uint32_t bhalftime = static_cast<uint32_t>(log(BPAY_POOL_FULL / btoken_balance.amount) / log(2));
+                int64_t bpayamount = static_cast<uint32_t>(ORIGIN_REWARD_NUMBER * pow(0.5, bhalftime));
+
+                INLINE_ACTION_SENDER(celes::token, transfer)
+                (token_account, {{bpaypool_account, active_permission}, {bpay_account, active_permission}}, {bpaypool_account, bpay_account, asset(bpayamount, core_symbol()), "block pay pool"});
+
+                _gstate.total_unpaid_block_fee = _gstate.total_unpaid_block_fee - prod->unpaid_block_fee;
+                _producers.modify(prod, eosio::same_payer, [&](auto &p) {
+                    p.unpaid_block_fee = p.unpaid_block_fee + bpayamount;
+                });
+            }
+
+            {
+                asset wtoken_balance = celes::token::get_balance(_self, wpaypool_account, core_symbol().code());
+                uint32_t whalftime = static_cast<uint32_t>(log(WPAY_POOL_FULL / wtoken_balance.amount) / log(2));
+                int64_t wpayamount = static_cast<uint32_t>(ORIGIN_REWARD_NUMBER * pow(0.5, whalftime));
+                INLINE_ACTION_SENDER(celes::token, transfer)
+                (token_account, {{wpaypool_account, active_permission}, {wpay_account, active_permission}}, {wpaypool_account, wpay_account, asset(wpayamount, core_symbol()), "wood pay pool"});
+            }
         }
+    }
+
+    {
+        asset dtoken_balance = celes::token::get_balance(_self, dpaypool_account, core_symbol().code());
+        uint32_t dhalftime = static_cast<uint32_t>(log(DPAY_POOL_FULL / dtoken_balance.amount) / log(2));
+        int64_t dpayamount = static_cast<uint32_t>(ORIGIN_REWARD_NUMBER * pow(0.5, dhalftime));
+        INLINE_ACTION_SENDER(celes::token, transfer)
+        (token_account, {{dpaypool_account, active_permission}, {dpay_account, active_permission}}, {dpaypool_account, wpay_account, asset(dpayamount, core_symbol()), "dbp pay pool"});
     }
 
     if (head_block_number % (uint32_t)forest_space_number() == 1)
@@ -100,38 +120,29 @@ void system_contract::claimrewards(const name owner)
         if (prod != _producers.end())
         {
             eosio_assert(prod->is_active, "producer does not have an active key");
-            if (ct - prod->last_claim_time > eosio::microseconds(useconds_per_day/4))
+            if (ct - prod->last_claim_time > eosio::microseconds(useconds_per_day / 4))
             {
                 // block fee
                 if (prod->unpaid_block_fee > 0)
                 {
-                    INLINE_ACTION_SENDER(celes::token, transfer)
-                    (token_account, {bpay_account, active_permission}, {bpay_account, owner, asset(prod->unpaid_block_fee, core_symbol()), "unallocated inflation"});
-                    _gstate.total_unpaid_block_fee = _gstate.total_unpaid_block_fee - prod->unpaid_block_fee;
+                    if (prod->unpaid_block_fee > 0)
+                    {
+                        INLINE_ACTION_SENDER(celes::token, transfer)
+                        (token_account, {{bpay_account, active_permission}, {owner, active_permission}}, {bpay_account, owner, asset(prod->unpaid_block_fee, core_symbol()), "unallocated inflation"});
+                        _gstate.total_unpaid_block_fee = _gstate.total_unpaid_block_fee - prod->unpaid_block_fee;
+                    }
                 }
 
                 // wood fee
                 if (_gstate2.total_unpaid_wood > 0 && prod->unpaid_wood > 0)
                 {
-                    uint32_t startBlockNum = _gstate2.last_wood_fill_block + 1;
-                    uint32_t endBlockNum = get_chain_head_num();
-
-                    if (startBlockNum <= endBlockNum)
-                    {
-                        int64_t woodfills = system_contract::calcFillNumber(startBlockNum, endBlockNum, REWARD_HALF_TIME, ORIGIN_REWARD_NUMBER);
-                        if (woodfills > 0)
-                        {
-                            INLINE_ACTION_SENDER(celes::token, transfer)
-                            (token_account, {_self, active_permission}, {_self, vpay_account, asset(woodfills, core_symbol()), "wood pay"});
-                        }
-                    }
-                    asset token_balance = celes::token::get_balance(_self, vpay_account, core_symbol().code());
+                    asset token_balance = celes::token::get_balance(_self, wpay_account, core_symbol().code());
                     int64_t woodpay = token_balance.amount * prod->unpaid_wood / _gstate2.total_unpaid_wood;
 
                     if (woodpay > 0)
                     {
                         INLINE_ACTION_SENDER(celes::token, transfer)
-                        (token_account, {vpay_account, active_permission}, {vpay_account, owner, asset(woodpay, core_symbol()), "wood pay"});
+                        (token_account, {{wpay_account, active_permission}, {owner, active_permission}}, {wpay_account, owner, asset(woodpay, core_symbol()), "wood pay"});
                     }
                 }
 
@@ -154,19 +165,6 @@ void system_contract::claimrewards(const name owner)
     {
         if (ct - dbp->last_claim_time > eosio::microseconds((1 + dbp->is_claim) * REWARD_TIME_SEP))
         {
-            uint32_t startBlockNum = _gstate2.last_dbp_fill_block + 1;
-            uint32_t endBlockNum = get_chain_head_num();
-
-            if (startBlockNum <= endBlockNum)
-            {
-                int64_t dappfills = system_contract::calcFillNumber(startBlockNum, endBlockNum, REWARD_HALF_TIME, ORIGIN_REWARD_NUMBER);
-                if (dappfills > 0)
-                {
-                    INLINE_ACTION_SENDER(celes::token, transfer)
-                    (token_account, {_self, active_permission}, {_self, dpay_account, asset(dappfills, core_symbol()), "dapp pay"});
-                }
-            }
-
             asset token_balance = celes::token::get_balance(_self, dpay_account, core_symbol().code());
             int64_t dpay = 0;
 
@@ -190,7 +188,7 @@ void system_contract::claimrewards(const name owner)
             if (dpay > 0)
             {
                 INLINE_ACTION_SENDER(celes::token, transfer)
-                (token_account, {dpay_account, active_permission}, {dpay_account, owner, asset(dpay, core_symbol()), "dapp pay"});
+                (token_account, {{dpay_account, active_permission}, {owner, active_permission}}, {dpay_account, owner, asset(dpay, core_symbol()), "dapp pay"});
 
                 setclaimed(owner.value);
             }
@@ -228,38 +226,4 @@ void system_contract::unlimitdbp(const name &owner_name)
     });
 }
 
-int64_t system_contract::calcFillNumber(uint32_t startBlockNum, uint32_t endBlockNum, uint32_t halfCycle, int32_t originFill)
-{
-    if (startBlockNum <= endBlockNum)
-    {
-        int64_t woodfills = 0;
-
-        uint32_t startCycle = startBlockNum % halfCycle;
-        uint32_t endCycle = endBlockNum % halfCycle;
-
-        for (uint32_t i = startCycle; i <= endCycle; i++)
-        {
-
-            int64_t dw = static_cast<int64_t>(originFill / pow(2, i));
-
-            if (i != endCycle)
-            {
-                woodfills += (dw * (i * halfCycle - halfCycle + 1));
-                startBlockNum = i * halfCycle + 1;
-                continue;
-            }
-            else
-            {
-                woodfills += (dw * (endBlockNum - startBlockNum + 1));
-                break;
-            }
-        }
-
-        return woodfills;
-    }
-    else
-    {
-        return 0;
-    }
-}
 } //namespace celesos

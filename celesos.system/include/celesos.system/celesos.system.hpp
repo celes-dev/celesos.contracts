@@ -13,8 +13,9 @@
 
 #include <string>
 
-// 21*100000000*0.15 ABP and dbp reward half time is same
-#define REWARD_HALF_TIME static_cast<int64_t>(3150 * 10000)
+#define DPAY_POOL_FULL 21 * 10000 * 10000 * 3000
+#define BPAY_POOL_FULL 21 * 10000 * 10000 * 1500
+#define WPAY_POOL_FULL 21 * 10000 * 10000 * 1500
 
 #define DAPP_PAY_UNACTIVE 1000 * 10000
 
@@ -28,7 +29,7 @@
 // origin reward number (初始出块奖励，折半衰减）
 #define ORIGIN_REWARD_NUMBER 5000
 // reward get min（if smaller than this number，you can't get the reward）最小奖励领取数，低于此数字将领取失败
-#define REWARD_GET_MIN 1000000
+#define REWARD_GET_MIN 5000
 // get reward time sep(奖励领取间隔时间，单位：秒）
 #define REWARD_TIME_SEP 5 * 60 * uint64_t(1000000)
 // singing ticker sep（唱票间隔期，每隔固定时间进行唱票）
@@ -342,10 +343,13 @@ class [[eosio::contract("celesos.system")]] system_contract : public native
     static constexpr eosio::name ramfee_account{"celes.ramfee"_n};
     static constexpr eosio::name stake_account{"celes.stake"_n};
     static constexpr eosio::name bpay_account{"celes.bpay"_n};
-    static constexpr eosio::name vpay_account{"celes.vpay"_n};
+    static constexpr eosio::name wpay_account{"celes.wpay"_n};
     static constexpr eosio::name dpay_account{"celes.dpay"_n};
+    static constexpr eosio::name bpaypool_account{"celes.bpayp"_n};
+    static constexpr eosio::name wpaypool_account{"celes.wpayp"_n};
+    static constexpr eosio::name dpaypool_account{"celes.dpayp"_n};
     static constexpr eosio::name names_account{"celes.names"_n};
-    static constexpr eosio::name dbps_account{"celes.dbps"_n};
+    static constexpr eosio::name dbp_account{"celes.dbp"_n};
     static constexpr symbol ramcore_symbol = symbol(symbol_code("RAMCORE"), 4);
     static constexpr symbol ram_symbol = symbol(symbol_code("RAM"), 0);
 
@@ -495,8 +499,6 @@ class [[eosio::contract("celesos.system")]] system_contract : public native
 
     void ramattenuator();
     void ramattenuator(name account);
-
-    int64_t calcFillNumber(uint32_t startBlockNum, uint32_t endBlockNum, uint32_t halfCycle, int32_t originFill);
 };
 
 } // namespace celesos
