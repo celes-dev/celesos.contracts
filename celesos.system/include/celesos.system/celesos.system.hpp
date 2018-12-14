@@ -17,6 +17,11 @@
 #define BPAY_POOL_FULL 21 * 10000 * 10000 * 1500
 #define WPAY_POOL_FULL 21 * 10000 * 10000 * 1500
 
+// origin reward number (初始出块奖励，折半衰减）
+#define ORIGIN_REWARD_NUMBER_BPAY 5000
+#define ORIGIN_REWARD_NUMBER_WPAY 5000
+#define ORIGIN_REWARD_NUMBER_DPAY 5000
+
 #define DAPP_PAY_UNACTIVE 1000 * 10000
 
 #ifdef DEBUG
@@ -26,8 +31,6 @@
 #define BP_COUNT 2
 // when the bp count is ok cycle for this number,the active the network(主网启动条件，BP个数达标轮数）
 #define ACTIVE_NETWORK_CYCLE 3
-// origin reward number (初始出块奖励，折半衰减）
-#define ORIGIN_REWARD_NUMBER 5000
 // reward get min（if smaller than this number，you can't get the reward）最小奖励领取数，低于此数字将领取失败
 #define REWARD_GET_MIN 5000
 // get reward time sep(奖励领取间隔时间，单位：秒）
@@ -43,8 +46,6 @@
 #define BP_COUNT 21
 // when the bp count is ok cycle for this number,the active the network(主网启动条件，BP个数达标轮数）
 #define ACTIVE_NETWORK_CYCLE 24
-// origin reward number (初始出块奖励，折半衰减）
-#define ORIGIN_REWARD_NUMBER 5000
 // reward get min（if smaller than this number，you can't get the reward）最小奖励领取数，低于此数字将领取失败
 #define REWARD_GET_MIN 1000000
 // get reward time sep(奖励领取间隔时间，单位：秒）

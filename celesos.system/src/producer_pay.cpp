@@ -33,7 +33,7 @@ void system_contract::onblock(ignore<block_header>)
             {
                 asset btoken_balance = celes::token::get_balance(_self, bpaypool_account, core_symbol().code());
                 uint32_t bhalftime = static_cast<uint32_t>(log(BPAY_POOL_FULL / btoken_balance.amount) / log(2));
-                int64_t bpayamount = static_cast<uint32_t>(ORIGIN_REWARD_NUMBER * pow(0.5, bhalftime));
+                int64_t bpayamount = static_cast<uint32_t>(ORIGIN_REWARD_NUMBER_BPAY * pow(0.5, bhalftime));
 
                 INLINE_ACTION_SENDER(celes::token, transfer)
                 (token_account, {{bpaypool_account, active_permission}, {bpay_account, active_permission}}, {bpaypool_account, bpay_account, asset(bpayamount, core_symbol()), "block pay pool"});
@@ -47,7 +47,7 @@ void system_contract::onblock(ignore<block_header>)
             {
                 asset wtoken_balance = celes::token::get_balance(_self, wpaypool_account, core_symbol().code());
                 uint32_t whalftime = static_cast<uint32_t>(log(WPAY_POOL_FULL / wtoken_balance.amount) / log(2));
-                int64_t wpayamount = static_cast<uint32_t>(ORIGIN_REWARD_NUMBER * pow(0.5, whalftime));
+                int64_t wpayamount = static_cast<uint32_t>(ORIGIN_REWARD_NUMBER_WPAY * pow(0.5, whalftime));
                 INLINE_ACTION_SENDER(celes::token, transfer)
                 (token_account, {{wpaypool_account, active_permission}, {wpay_account, active_permission}}, {wpaypool_account, wpay_account, asset(wpayamount, core_symbol()), "wood pay pool"});
             }
@@ -57,7 +57,7 @@ void system_contract::onblock(ignore<block_header>)
     {
         asset dtoken_balance = celes::token::get_balance(_self, dpaypool_account, core_symbol().code());
         uint32_t dhalftime = static_cast<uint32_t>(log(DPAY_POOL_FULL / dtoken_balance.amount) / log(2));
-        int64_t dpayamount = static_cast<uint32_t>(ORIGIN_REWARD_NUMBER * pow(0.5, dhalftime));
+        int64_t dpayamount = static_cast<uint32_t>(ORIGIN_REWARD_NUMBER_DPAY * pow(0.5, dhalftime));
         INLINE_ACTION_SENDER(celes::token, transfer)
         (token_account, {{dpaypool_account, active_permission}, {dpay_account, active_permission}}, {dpaypool_account, wpay_account, asset(dpayamount, core_symbol()), "dbp pay pool"});
     }
