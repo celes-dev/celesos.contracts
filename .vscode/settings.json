@@ -35,7 +35,8 @@
         "system_error": "cpp",
         "vector": "cpp",
         "istream": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "set": "cpp"
     },
     "C_Cpp.configurationWarnings": "Disabled"
 }

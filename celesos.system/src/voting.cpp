@@ -80,7 +80,7 @@ void system_contract::regdbp(const name dbpname)
 {
     require_auth(dbp_account);
     auto dbp = _dbps.find(dbpname.value);
-    eosio_assert(dbp != _dbps.end(), "dapp owner is exist.");
+    eosio_assert(dbp == _dbps.end(), "dapp owner is exist.");
     eosio_assert(cregdbp(dbpname.value), "dapp is not exist by this account.");
 
     _dbps.emplace(dbpname, [&](dbp_info &info) {
