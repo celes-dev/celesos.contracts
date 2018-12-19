@@ -36,6 +36,7 @@ add_subdirectory(celesos.bios)
 add_subdirectory(celesos.msig)
 add_subdirectory(celesos.wrap)
 add_subdirectory(celesos.system)
+add_subdirectory(celesos.test)
 
 if (APPLE)
    set(OPENSSL_ROOT "/usr/local/opt/openssl")

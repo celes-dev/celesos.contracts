@@ -313,7 +313,7 @@ void system_contract::ramattenuator()
     {
         last = temp;
     }
-    eosio::print("ramattenuator account=", last);
+    
     user_resources_table userres(_self, _self.value);
     auto item = userres.lower_bound(last);
 

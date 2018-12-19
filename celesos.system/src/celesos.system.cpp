@@ -17,6 +17,7 @@ system_contract::system_contract(name s, name code, datastream<const char *> ds)
       _voters(_self, _self.value),
       _producers(_self, _self.value),
       _dbps(_self, _self.value),
+      _dbpunishs(_self, _self.value),
       _global(_self, _self.value),
       _global2(_self, _self.value),
       _burninfos(_self, _self.value),
@@ -24,8 +25,6 @@ system_contract::system_contract(name s, name code, datastream<const char *> ds)
       _burnblockstatinfos(_self, _self.value),
       _rammarket(_self, _self.value)
 {
-
-    //print( "construct system\n" );
     _gstate = _global.exists() ? _global.get() : get_default_parameters();
     _gstate2 = _global2.exists() ? _global2.get() : eosio_global_state2{};
 }
@@ -346,6 +345,6 @@ EOSIO_DISPATCH(celesos::system_contract,
                // delegate_bandwidth.cpp
                (delegatebw)(undelegatebw)(buyrambytes)(buyram)(sellram)(refund)
                // voting.cpp
-               (regproducer)(unregprod)(regproxy)(regdbp)(unregdbp)(setproxy)(voteproducer)(limitdbp)(unlimitdbp)
+               (regproducer)(unregprod)(regproxy)(regdbp)(unregdbp)(setproxy)(voteproducer)(limitbp)(unlimitbp)
                // native.hpp (newaccount definition is actually in celesos.system.cpp)
                (newaccount)(updateauth)(deleteauth)(linkauth)(unlinkauth)(canceldelay)(onerror)(setabi))

@@ -15,8 +15,6 @@ void system_contract::onblock(ignore<block_header>)
 {
     using namespace eosio;
 
-    require_auth(_self);
-
     block_timestamp timestamp;
     name producer;
     _ds >> timestamp >> producer;
@@ -31,7 +29,7 @@ void system_contract::onblock(ignore<block_header>)
         if (prod != _producers.end())
         {
             {
-                asset btoken_balance = celes::token::get_balance(_self, bpaypool_account, core_symbol().code());
+                asset btoken_balance = celes::token::get_balance(token_account, bpaypool_account, core_symbol().code());
                 uint32_t bhalftime = static_cast<uint32_t>(log(BPAY_POOL_FULL / btoken_balance.amount) / log(2));
                 int64_t bpayamount = static_cast<uint32_t>(ORIGIN_REWARD_NUMBER_BPAY * pow(0.5, bhalftime));
 
@@ -45,7 +43,7 @@ void system_contract::onblock(ignore<block_header>)
             }
 
             {
-                asset wtoken_balance = celes::token::get_balance(_self, wpaypool_account, core_symbol().code());
+                asset wtoken_balance = celes::token::get_balance(token_account, wpaypool_account, core_symbol().code());
                 uint32_t whalftime = static_cast<uint32_t>(log(WPAY_POOL_FULL / wtoken_balance.amount) / log(2));
                 int64_t wpayamount = static_cast<uint32_t>(ORIGIN_REWARD_NUMBER_WPAY * pow(0.5, whalftime));
                 INLINE_ACTION_SENDER(celes::token, transfer)
@@ -55,11 +53,12 @@ void system_contract::onblock(ignore<block_header>)
     }
 
     {
-        asset dtoken_balance = celes::token::get_balance(_self, dpaypool_account, core_symbol().code());
+        asset dtoken_balance = celes::token::get_balance(token_account, dpaypool_account, core_symbol().code());
         uint32_t dhalftime = static_cast<uint32_t>(log(DPAY_POOL_FULL / dtoken_balance.amount) / log(2));
         int64_t dpayamount = static_cast<uint32_t>(ORIGIN_REWARD_NUMBER_DPAY * pow(0.5, dhalftime));
+
         INLINE_ACTION_SENDER(celes::token, transfer)
-        (token_account, {{dpaypool_account, active_permission}, {dpay_account, active_permission}}, {dpaypool_account, wpay_account, asset(dpayamount, core_symbol()), "dbp pay pool"});
+        (token_account, {{dpaypool_account, active_permission}, {dpay_account, active_permission}}, {dpaypool_account, dpay_account, asset(dpayamount, core_symbol()), "dbp pay pool"});
     }
 
     if (head_block_number % (uint32_t)forest_space_number() == 1)
@@ -111,119 +110,167 @@ void system_contract::claimrewards(const name owner)
 {
     require_auth(owner);
 
-    const auto ct = current_time_point();
-
     // block fee and wood fee
     if (_gstate.is_network_active)
     {
+        int64_t bpay = 0;
+        int64_t wpay = 0;
+        int64_t dpay = 0;
+
+        const auto ct = current_time_point();
         auto prod = _producers.find(owner.value);
-        if (prod != _producers.end())
+        auto dbp = _dbps.find(owner.value);
+        auto bppunish_info = _dbpunishs.find(owner.value);
+
+        int32_t punishCount = (bppunish_info == _dbpunishs.end()) ? 0 : bppunish_info->punish_count;
+
+        if (prod != _producers.end() && prod->is_active)
         {
-            eosio_assert(prod->is_active, "producer does not have an active key");
-            if (ct - prod->last_claim_time > eosio::microseconds(useconds_per_day / 4))
+            if (ct - prod->last_claim_time <= eosio::microseconds((1 + punishCount) * useconds_per_day / 4))
+            {
+                eosio_assert(false, "already claimed rewards within past 6 hours or punished");
+            }
+            else
             {
                 // block fee
                 if (prod->unpaid_block_fee > 0)
                 {
                     if (prod->unpaid_block_fee > 0)
                     {
-                        INLINE_ACTION_SENDER(celes::token, transfer)
-                        (token_account, {{bpay_account, active_permission}, {owner, active_permission}}, {bpay_account, owner, asset(prod->unpaid_block_fee, core_symbol()), "unallocated inflation"});
-                        _gstate.total_unpaid_block_fee = _gstate.total_unpaid_block_fee - prod->unpaid_block_fee;
+                        bpay = prod->unpaid_block_fee;
                     }
                 }
 
                 // wood fee
                 if (_gstate2.total_unpaid_wood > 0 && prod->unpaid_wood > 0)
                 {
-                    asset token_balance = celes::token::get_balance(_self, wpay_account, core_symbol().code());
-                    int64_t woodpay = token_balance.amount * prod->unpaid_wood / _gstate2.total_unpaid_wood;
+                    asset token_balance = celes::token::get_balance(token_account, wpay_account, core_symbol().code());
+                    wpay = token_balance.amount * prod->unpaid_wood / _gstate2.total_unpaid_wood;
+                }
+            }
+        }
 
-                    if (woodpay > 0)
+        // dapppay
+        if (dbp != _dbps.end())
+        {
+            if (ct - dbp->last_claim_time <= eosio::microseconds((1 + punishCount) * REWARD_TIME_SEP))
+            {
+                eosio_assert(false, "already claimed rewards within past 6 hours or punished");
+            }
+            else
+            {
+                asset token_balance = celes::token::get_balance(token_account, dpay_account, core_symbol().code());
+                if (_gstate2.is_dbp_active)
+                {
+                    int64_t all_unpaid_resouresweight = total_unpaid_resouresweight();
+                    int64_t this_unpaid_resouresweight = unpaid_resouresweight(owner.value);
+                    if (all_unpaid_resouresweight > 0 && this_unpaid_resouresweight > 0 && all_unpaid_resouresweight >= this_unpaid_resouresweight)
                     {
-                        INLINE_ACTION_SENDER(celes::token, transfer)
-                        (token_account, {{wpay_account, active_permission}, {owner, active_permission}}, {wpay_account, owner, asset(woodpay, core_symbol()), "wood pay"});
+                        dpay = token_balance.amount * this_unpaid_resouresweight / all_unpaid_resouresweight;
                     }
                 }
-
-                _producers.modify(prod, eosio::same_payer, [&](auto &p) {
-                    p.last_claim_time = ct;
-                    p.unpaid_wood = 0;
-                    p.unpaid_block_fee = 0;
-                });
-            }
-            else
-            {
-                eosio_assert(false, "already claimed rewards within past 6 hours");
+                else
+                {
+                    if (token_balance.amount >= DAPP_PAY_UNACTIVE)
+                    {
+                        dpay = DAPP_PAY_UNACTIVE;
+                    }
+                }
             }
         }
-    }
 
-    // dapppay
-    auto dbp = _dbps.find(owner.value);
-    if (dbp != _dbps.end())
-    {
-        if (ct - dbp->last_claim_time > eosio::microseconds((1 + dbp->is_claim) * REWARD_TIME_SEP))
+        if (bpay + wpay + dpay < REWARD_GET_MIN)
         {
-            asset token_balance = celes::token::get_balance(_self, dpay_account, core_symbol().code());
-            int64_t dpay = 0;
+            bpay = 0;
+            wpay = 0;
+            dpay = 0;
+        }
 
-            if (_gstate2.is_dbp_active)
-            {
-                int64_t all_unpaid_resouresweight = total_unpaid_resouresweight();
-                int64_t this_unpaid_resouresweight = unpaid_resouresweight(owner.value);
-                if (all_unpaid_resouresweight > 0 && this_unpaid_resouresweight > 0 && all_unpaid_resouresweight >= this_unpaid_resouresweight)
-                {
-                    dpay = token_balance.amount * this_unpaid_resouresweight / all_unpaid_resouresweight;
-                }
-            }
-            else
-            {
-                if (token_balance.amount >= DAPP_PAY_UNACTIVE)
-                {
-                    dpay = DAPP_PAY_UNACTIVE;
-                }
-            }
+        if (bpay > 0)
+        {
+            INLINE_ACTION_SENDER(celes::token, transfer)
+            (token_account, {{bpay_account, active_permission}, {owner, active_permission}}, {bpay_account, owner, asset(bpay, core_symbol()), "unallocated inflation"});
+            _gstate.total_unpaid_block_fee = _gstate.total_unpaid_block_fee - bpay;
+        }
 
-            if (dpay > 0)
-            {
-                INLINE_ACTION_SENDER(celes::token, transfer)
-                (token_account, {{dpay_account, active_permission}, {owner, active_permission}}, {dpay_account, owner, asset(dpay, core_symbol()), "dapp pay"});
+        if (wpay > 0)
+        {
+            INLINE_ACTION_SENDER(celes::token, transfer)
+            (token_account, {{wpay_account, active_permission}, {owner, active_permission}}, {wpay_account, owner, asset(wpay, core_symbol()), "wood pay"});
+        }
 
-                setclaimed(owner.value);
-            }
-
-            _dbps.modify(dbp, eosio::same_payer, [&](auto &p) {
+        if (prod != _producers.end())
+        {
+            _producers.modify(prod, eosio::same_payer, [&](auto &p) {
                 p.last_claim_time = ct;
+                if (wpay > 0)
+                {
+                    p.unpaid_wood = 0;
+                }
+                if (bpay > 0)
+                {
+                    p.unpaid_block_fee = 0;
+                }
             });
         }
-        else
+
+        if (dpay > 0)
         {
-            eosio_assert(false, "already claimed rewards within past 6 hours");
+            INLINE_ACTION_SENDER(celes::token, transfer)
+            (token_account, {{dpay_account, active_permission}, {owner, active_permission}}, {dpay_account, owner, asset(dpay, core_symbol()), "dapp pay"});
+
+            setclaimed(owner.value);
+
+            if (dbp != _dbps.end())
+            {
+                _dbps.modify(dbp, eosio::same_payer, [&](auto &p) {
+                    p.last_claim_time = ct;
+                });
+            }
+        }
+
+        if (punishCount > 0)
+        {
+            _dbpunishs.erase(bppunish_info);
         }
     }
-}
+} // namespace celesos
 
-void system_contract::limitdbp(const name &owner_name)
+void system_contract::limitbp(const name &owner_name)
 {
     require_auth(_self);
-    auto dbp = _dbps.find(owner_name.value);
-    eosio_assert(dbp != _dbps.end(), "dapp owner is not exist");
-
-    _dbps.modify(dbp, eosio::same_payer, [&](dbp_info &info) {
-        info.is_claim = info.is_claim + 1;
-    });
+    auto bppunish_info = _dbpunishs.find(owner_name.value);
+    if (bppunish_info == _dbpunishs.end())
+    {
+        _dbpunishs.emplace(_self, [&](auto &s) {
+            s.owner = owner_name;
+            s.punish_count = 1;
+        });
+    }
+    else
+    {
+        _dbpunishs.modify(bppunish_info, eosio::same_payer, [&](bp_punish_info &info) {
+            info.punish_count = info.punish_count + 1;
+        });
+    };
 }
 
-void system_contract::unlimitdbp(const name &owner_name)
+void system_contract::unlimitbp(const name &owner_name)
 {
     require_auth(_self);
-    auto dbp = _dbps.find(owner_name.value);
-    eosio_assert(dbp != _dbps.end(), "dapp owner is not exist");
+    auto bppunish_info = _dbpunishs.find(owner_name.value);
+    eosio_assert(bppunish_info != _dbpunishs.end(), "account  is not punished");
 
-    _dbps.modify(dbp, eosio::same_payer, [&](dbp_info &info) {
-        info.is_claim = 0;
-    });
+    if (bppunish_info->punish_count > 1)
+    {
+        _dbpunishs.modify(bppunish_info, eosio::same_payer, [&](bp_punish_info &info) {
+            info.punish_count = info.punish_count - 1;
+        });
+    }
+    else
+    {
+        _dbpunishs.erase(bppunish_info);
+    }
 }
 
 } //namespace celesos

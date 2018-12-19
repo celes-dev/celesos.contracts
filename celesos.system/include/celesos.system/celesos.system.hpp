@@ -13,9 +13,9 @@
 
 #include <string>
 
-#define DPAY_POOL_FULL 21 * 10000 * 10000 * 3000
-#define BPAY_POOL_FULL 21 * 10000 * 10000 * 1500
-#define WPAY_POOL_FULL 21 * 10000 * 10000 * 1500
+#define DPAY_POOL_FULL static_cast<uint64_t>(21 * 10000 * 10000) * 3000
+#define BPAY_POOL_FULL static_cast<uint64_t>(21 * 10000 * 10000) * 1500
+#define WPAY_POOL_FULL static_cast<uint64_t>(21 * 10000 * 10000) * 1500
 
 // origin reward number (初始出块奖励，折半衰减）
 #define ORIGIN_REWARD_NUMBER_BPAY 5000
@@ -24,36 +24,36 @@
 
 #define DAPP_PAY_UNACTIVE 1000 * 10000
 
-#ifdef DEBUG
+// #ifdef DEBUG
 
 #define TARGET_WOOD_NUMBER 120
 // number of bp,BP个数
-#define BP_COUNT 2
+#define BP_COUNT 9
 // when the bp count is ok cycle for this number,the active the network(主网启动条件，BP个数达标轮数）
 #define ACTIVE_NETWORK_CYCLE 3
 // reward get min（if smaller than this number，you can't get the reward）最小奖励领取数，低于此数字将领取失败
-#define REWARD_GET_MIN 5000
+#define REWARD_GET_MIN 500000
 // get reward time sep(奖励领取间隔时间，单位：秒）
 #define REWARD_TIME_SEP 5 * 60 * uint64_t(1000000)
 // singing ticker sep（唱票间隔期，每隔固定时间进行唱票）
 #define SINGING_TICKER_SEP 5 * 2 * 6 * 10
 
-#else
+// #else
 
-#define TARGET_WOOD_NUMBER 80
+// #define TARGET_WOOD_NUMBER 80
 
-// number of bp,BP个数
-#define BP_COUNT 21
-// when the bp count is ok cycle for this number,the active the network(主网启动条件，BP个数达标轮数）
-#define ACTIVE_NETWORK_CYCLE 24
-// reward get min（if smaller than this number，you can't get the reward）最小奖励领取数，低于此数字将领取失败
-#define REWARD_GET_MIN 1000000
-// get reward time sep(奖励领取间隔时间，单位：秒）
-#define REWARD_TIME_SEP 24 * 60 * 60 * uint64_t(1000000)
-// singing ticker sep（唱票间隔期，每隔固定时间进行唱票）
-#define SINGING_TICKER_SEP BP_COUNT * 6 * 60
+// // number of bp,BP个数
+// #define BP_COUNT 21
+// // when the bp count is ok cycle for this number,the active the network(主网启动条件，BP个数达标轮数）
+// #define ACTIVE_NETWORK_CYCLE 24
+// // reward get min（if smaller than this number，you can't get the reward）最小奖励领取数，低于此数字将领取失败
+// #define REWARD_GET_MIN 1000000
+// // get reward time sep(奖励领取间隔时间，单位：秒）
+// #define REWARD_TIME_SEP 24 * 60 * 60 * uint64_t(1000000)
+// // singing ticker sep（唱票间隔期，每隔固定时间进行唱票）
+// #define SINGING_TICKER_SEP BP_COUNT * 6 * 60
 
-#endif
+// #endif
 
 namespace celesos
 {
@@ -171,13 +171,22 @@ struct [[ eosio::table, eosio::contract("celesos.system") ]] producer_info
 struct [[ eosio::table, eosio::contract("celesos.system") ]] dbp_info
 {
     name owner;
-    uint16_t is_claim = 0;
     time_point last_claim_time;
 
     uint64_t primary_key() const { return owner.value; }
 
     // explicit serialization macro is not necessary, used here only to improve compilation time
-    EOSLIB_SERIALIZE(dbp_info, (owner)(is_claim)(last_claim_time))
+    EOSLIB_SERIALIZE(dbp_info, (owner)(last_claim_time))
+};
+
+struct [[ eosio::table, eosio::contract("celesos.system") ]] bp_punish_info
+{
+    name owner;
+    uint16_t punish_count = 0;
+    uint64_t primary_key() const { return owner.value; }
+
+    // explicit serialization macro is not necessary, used here only to improve compilation time
+    EOSLIB_SERIALIZE(bp_punish_info, (owner)(punish_count))
 };
 
 struct [[ eosio::table, eosio::contract("celesos.system") ]] voter_info
@@ -297,6 +306,8 @@ typedef eosio::multi_index<"voters"_n, voter_info> voters_table;
 
 typedef eosio::multi_index<"dbp"_n, dbp_info> dbps_table;
 
+typedef eosio::multi_index<"bppunish"_n, bp_punish_info> bp_punish_table;
+
 typedef eosio::multi_index<"woodburns"_n, wood_burn_info,
                            indexed_by<"wood"_n, const_mem_fun<wood_burn_info, uint64_t, &wood_burn_info::get_wood_index>>,
                            indexed_by<"blocknumber"_n, const_mem_fun<wood_burn_info, uint64_t, &wood_burn_info::get_block_number>>>
@@ -325,6 +336,7 @@ class [[eosio::contract("celesos.system")]] system_contract : public native
     producers_table _producers;
 
     dbps_table _dbps;
+    bp_punish_table _dbpunishs;
 
     global_state_singleton _global;
     global_state2_singleton _global2;
@@ -453,8 +465,8 @@ class [[eosio::contract("celesos.system")]] system_contract : public native
     [[eosio::action]] void voteproducer(const name voter_name, const name wood_owner_name, std::string wood,
                                         const uint32_t block_number, const name producer_name);
 
-    [[eosio::action]] void limitdbp(const name &owner_name);
-    [[eosio::action]] void unlimitdbp(const name &owner_name);
+    [[eosio::action]] void limitbp(const name &owner_name);
+    [[eosio::action]] void unlimitbp(const name &owner_name);
 
   private:
     // Implementation details:
