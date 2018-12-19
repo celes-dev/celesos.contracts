@@ -32,15 +32,15 @@
 // when the bp count is ok cycle for this number,the active the network(主网启动条件，BP个数达标轮数）
 #define ACTIVE_NETWORK_CYCLE 3
 // reward get min（if smaller than this number，you can't get the reward）最小奖励领取数，低于此数字将领取失败
-#define REWARD_GET_MIN 500000
+#define REWARD_GET_MIN 100000
 // get reward time sep(奖励领取间隔时间，单位：秒）
-#define REWARD_TIME_SEP 5 * 60 * uint64_t(1000000)
+#define REWARD_TIME_SEP 1 * 60 * uint64_t(1000000)
 // singing ticker sep（唱票间隔期，每隔固定时间进行唱票）
 #define SINGING_TICKER_SEP 5 * 2 * 6 * 10
 
 // #else
 
-// #define TARGET_WOOD_NUMBER 80
+// #define TARGET_WOOD_NUMBER 300
 
 // // number of bp,BP个数
 // #define BP_COUNT 21
@@ -49,7 +49,7 @@
 // // reward get min（if smaller than this number，you can't get the reward）最小奖励领取数，低于此数字将领取失败
 // #define REWARD_GET_MIN 1000000
 // // get reward time sep(奖励领取间隔时间，单位：秒）
-// #define REWARD_TIME_SEP 24 * 60 * 60 * uint64_t(1000000)
+// #define REWARD_TIME_SEP 6 * 60 * 60 * uint64_t(1000000)
 // // singing ticker sep（唱票间隔期，每隔固定时间进行唱票）
 // #define SINGING_TICKER_SEP BP_COUNT * 6 * 60
 

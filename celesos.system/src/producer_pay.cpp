@@ -126,7 +126,7 @@ void system_contract::claimrewards(const name owner)
 
         if (prod != _producers.end() && prod->is_active)
         {
-            if (ct - prod->last_claim_time <= eosio::microseconds((1 + punishCount) * useconds_per_day / 4))
+            if (ct - prod->last_claim_time <= eosio::microseconds((1 + punishCount) * REWARD_TIME_SEP))
             {
                 eosio_assert(false, "already claimed rewards within past 6 hours or punished");
             }
