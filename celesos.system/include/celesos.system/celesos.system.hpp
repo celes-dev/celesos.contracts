@@ -107,23 +107,10 @@ struct[[ eosio::table("global"), eosio::contract("celesos.system") ]] eosio_glob
     uint32_t total_unpaid_wood = 0;
     int64_t total_activated_stake = 0;
     uint16_t last_producer_schedule_size = 0;
-    uint32_t total_producer_vote_weight = 0; /// the sum of all producer votes
     block_timestamp last_name_close;
     bool is_network_active = false;
     uint16_t active_touch_count = 0;
     uint64_t last_account = 0;
-
-    // explicit serialization macro is not necessary, used here only to improve compilation time
-    EOSLIB_SERIALIZE_DERIVED(eosio_global_state, eosio::blockchain_parameters,
-                             (max_ram_size)(total_ram_bytes_reserved)(total_ram_stake)(last_producer_schedule_block)(total_unpaid_block_fee)(total_unpaid_wood)(total_activated_stake)(last_producer_schedule_size)(total_producer_vote_weight)(last_name_close)(is_network_active)(active_touch_count)(last_account))
-};
-
-/**
-    * Defines new global state parameters added after version 1.0
-    */
-struct [[ eosio::table("global2"), eosio::contract("celesos.system") ]] eosio_global_state2
-{
-    eosio_global_state2() {}
 
     uint16_t new_ram_per_block = 0;
     block_timestamp last_ram_increase;
@@ -131,19 +118,22 @@ struct [[ eosio::table("global2"), eosio::contract("celesos.system") ]] eosio_gl
     double reserved = 0;
     uint8_t revision = 0; ///< used to track version updates in the future.
 
-    uint32_t total_unpaid_wood = 0;
+    uint32_t total_wood = 0;
     uint32_t total_dbp_count = 0;
-    uint32_t last_wood_fill_block = 0;
-    uint32_t last_dbp_fill_block = 0;
     bool is_dbp_active = false;
 
-    EOSLIB_SERIALIZE(eosio_global_state2, (new_ram_per_block)(last_ram_increase)(last_block_num)(reserved)(revision)(total_unpaid_wood)(total_dbp_count)(last_wood_fill_block)(last_dbp_fill_block)(is_dbp_active))
+    // explicit serialization macro is not necessary, used here only to improve compilation time
+    EOSLIB_SERIALIZE_DERIVED(eosio_global_state, eosio::blockchain_parameters,
+                             (max_ram_size)(total_ram_bytes_reserved)(total_ram_stake)(last_producer_schedule_block)(total_unpaid_block_fee)(total_unpaid_wood)
+                             (total_activated_stake)(last_producer_schedule_size)(last_name_close)(is_network_active)(active_touch_count)(last_account)
+                             (new_ram_per_block)(last_ram_increase)(last_block_num)(reserved)(revision)(total_wood)(total_unpaid_wood)(total_dbp_count)
+                             (is_dbp_active))
 };
 
 struct [[ eosio::table, eosio::contract("celesos.system") ]] producer_info
 {
     name owner;
-    uint32_t total_votes = 0;
+    uint32_t valid_woods = 0;
     eosio::public_key producer_key; /// a packed public key object
     bool is_active = true;
     std::string url;
@@ -154,7 +144,7 @@ struct [[ eosio::table, eosio::contract("celesos.system") ]] producer_info
 
     uint64_t primary_key() const { return owner.value; }
 
-    double by_votes() const { return is_active ? -1.0 * total_votes : total_votes; }
+    double by_votes() const { return is_active ? -1.0 * valid_woods : valid_woods; }
 
     bool active() const { return is_active; }
 
@@ -165,7 +155,7 @@ struct [[ eosio::table, eosio::contract("celesos.system") ]] producer_info
     }
 
     // explicit serialization macro is not necessary, used here only to improve compilation time
-    EOSLIB_SERIALIZE(producer_info, (owner)(total_votes)(producer_key)(is_active)(url)(location)(unpaid_block_fee)(unpaid_wood)(last_claim_time))
+    EOSLIB_SERIALIZE(producer_info, (owner)(valid_woods)(producer_key)(is_active)(url)(location)(unpaid_block_fee)(unpaid_wood)(last_claim_time))
 };
 
 struct [[ eosio::table, eosio::contract("celesos.system") ]] dbp_info
@@ -327,7 +317,6 @@ typedef eosio::multi_index<"producers"_n, producer_info,
     producers_table;
 
 typedef eosio::singleton<"global"_n, eosio_global_state> global_state_singleton;
-typedef eosio::singleton<"global2"_n, eosio_global_state2> global_state2_singleton;
 
 static constexpr uint32_t seconds_per_day = 24 * 3600;
 
@@ -341,14 +330,12 @@ class [[eosio::contract("celesos.system")]] system_contract : public native
     bp_punish_table _dbpunishs;
 
     global_state_singleton _global;
-    global_state2_singleton _global2;
 
     wood_burn_table _burninfos;
     wood_burn_producer_block_table _burnproducerstatinfos;
     wood_burn_block_stat_table _burnblockstatinfos;
 
     eosio_global_state _gstate;
-    eosio_global_state2 _gstate2;
     rammarket _rammarket;
 
   public:

@@ -19,14 +19,12 @@ system_contract::system_contract(name s, name code, datastream<const char *> ds)
       _dbps(_self, _self.value),
       _dbpunishs(_self, _self.value),
       _global(_self, _self.value),
-      _global2(_self, _self.value),
       _burninfos(_self, _self.value),
       _burnproducerstatinfos(_self, _self.value),
       _burnblockstatinfos(_self, _self.value),
       _rammarket(_self, _self.value)
 {
     _gstate = _global.exists() ? _global.get() : get_default_parameters();
-    _gstate2 = _global2.exists() ? _global2.get() : eosio_global_state2{};
 }
 
 eosio_global_state system_contract::get_default_parameters()
@@ -57,7 +55,6 @@ symbol system_contract::core_symbol() const
 system_contract::~system_contract()
 {
     _global.set(_gstate, _self);
-    _global2.set(_gstate2, _self);
 }
 
 void system_contract::setram(uint64_t max_ram_size)
@@ -85,11 +82,11 @@ void system_contract::update_ram_supply()
 {
     auto cbt = current_block_time();
 
-    if (cbt <= _gstate2.last_ram_increase)
+    if (cbt <= _gstate.last_ram_increase)
         return;
 
     auto itr = _rammarket.find(ramcore_symbol.raw());
-    auto new_ram = (cbt.slot - _gstate2.last_ram_increase.slot) * _gstate2.new_ram_per_block;
+    auto new_ram = (cbt.slot - _gstate.last_ram_increase.slot) * _gstate.new_ram_per_block;
     _gstate.max_ram_size += new_ram;
 
     /**
@@ -98,7 +95,7 @@ void system_contract::update_ram_supply()
     _rammarket.modify(itr, eosio::same_payer, [&](auto &m) {
         m.base.balance.amount += new_ram;
     });
-    _gstate2.last_ram_increase = cbt;
+    _gstate.last_ram_increase = cbt;
 }
 
 /**
@@ -113,7 +110,7 @@ void system_contract::setramrate(uint16_t bytes_per_block)
     require_auth(_self);
 
     update_ram_supply();
-    _gstate2.new_ram_per_block = bytes_per_block;
+    _gstate.new_ram_per_block = bytes_per_block;
 }
 
 void system_contract::setparams(const eosio::blockchain_parameters &params)
@@ -152,11 +149,11 @@ void system_contract::rmvproducer(name producer)
 void system_contract::updtrevision(uint8_t revision)
 {
     require_auth(_self);
-    eosio_assert(_gstate2.revision < 255, "can not increment revision"); // prevent wrap around
-    eosio_assert(revision == _gstate2.revision + 1, "can only increment revision by one");
+    eosio_assert(_gstate.revision < 255, "can not increment revision"); // prevent wrap around
+    eosio_assert(revision == _gstate.revision + 1, "can only increment revision by one");
     eosio_assert(revision <= 1, // set upper bound to greatest revision supported in the code
                  "specified revision is not yet supported by the code");
-    _gstate2.revision = revision;
+    _gstate.revision = revision;
 }
 
 void system_contract::bidname(name bidder, name newname, asset bid)

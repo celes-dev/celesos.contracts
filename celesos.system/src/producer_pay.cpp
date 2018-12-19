@@ -142,10 +142,10 @@ void system_contract::claimrewards(const name owner)
                 }
 
                 // wood fee
-                if (_gstate2.total_unpaid_wood > 0 && prod->unpaid_wood > 0)
+                if (_gstate.total_unpaid_wood > 0 && prod->unpaid_wood > 0)
                 {
                     asset token_balance = celes::token::get_balance(token_account, wpay_account, core_symbol().code());
-                    wpay = token_balance.amount * prod->unpaid_wood / _gstate2.total_unpaid_wood;
+                    wpay = token_balance.amount * prod->unpaid_wood / _gstate.total_unpaid_wood;
                 }
             }
         }
@@ -160,7 +160,7 @@ void system_contract::claimrewards(const name owner)
             else
             {
                 asset token_balance = celes::token::get_balance(token_account, dpay_account, core_symbol().code());
-                if (_gstate2.is_dbp_active)
+                if (_gstate.is_dbp_active)
                 {
                     int64_t all_unpaid_resouresweight = total_unpaid_resouresweight();
                     int64_t this_unpaid_resouresweight = unpaid_resouresweight(owner.value);
@@ -197,6 +197,7 @@ void system_contract::claimrewards(const name owner)
         {
             INLINE_ACTION_SENDER(celes::token, transfer)
             (token_account, {{wpay_account, active_permission}, {owner, active_permission}}, {wpay_account, owner, asset(wpay, core_symbol()), "wood pay"});
+            _gstate.total_unpaid_wood = _gstate.total_unpaid_wood - prod->unpaid_wood;
         }
 
         if (prod != _producers.end())

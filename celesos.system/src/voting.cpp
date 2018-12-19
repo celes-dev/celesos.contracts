@@ -56,7 +56,7 @@ void system_contract::regproducer(const name producer, const eosio::public_key &
     {
         _producers.emplace(producer, [&](producer_info &info) {
             info.owner = producer;
-            info.total_votes = 0;
+            info.valid_woods = 0;
             info.producer_key = producer_key;
             info.is_active = true;
             info.url = url;
@@ -124,7 +124,7 @@ void system_contract::update_elected_producers(uint32_t head_block_number)
 
     for (auto it = idx.cbegin();
          it != idx.cend() && top_producers.size() < BP_COUNT &&
-         0 < it->total_votes && it->active();
+         0 < it->valid_woods && it->active();
          ++it)
     {
         top_producers.emplace_back(std::pair<eosio::producer_key, uint16_t>(
@@ -263,10 +263,12 @@ void system_contract::update_vote(const name voter_name,
     eosio_assert(pitr.is_active, "producer is not active");
 
     _producers.modify(pitr, eosio::same_payer, [&](auto &p) {
-        p.total_votes++;
+        p.valid_woods++;
+        p.unpaid_wood++;
     });
 
-    _gstate.total_producer_vote_weight++;
+    _gstate.total_unpaid_wood++;
+    _gstate.total_wood++;
 
     // 增加投票明细记录
     _burninfos.emplace(_self, [&](auto &burn) {
@@ -388,7 +390,7 @@ uint32_t system_contract::clean_dirty_stat_producers(uint32_t block_number,
             if (producer != _producers.end())
             {
                 _producers.modify(producer, eosio::same_payer, [&](auto &p) {
-                    p.total_votes = p.total_votes - it->stat;
+                    p.valid_woods = p.valid_woods - it->stat;
                 });
             }
 
