@@ -76,17 +76,31 @@ void system_contract::unregprod(const name producer)
     });
 }
 
-void system_contract::regdbp(const name dbpname)
+void system_contract::regdbp(const name dbpname, std::string url, std::string steemid)
 {
     require_auth(dbp_account);
-    auto dbp = _dbps.find(dbpname.value);
-    eosio_assert(dbp == _dbps.end(), "dbp is exist.");
-    eosio_assert(cregdbp(dbpname.value), "dapp is not exist by this account.");
-    
-    _dbps.emplace(dbpname, [&](dbp_info &info) {
-        info.owner = dbpname;
-        info.last_claim_time = current_time_point();
-    });
+    auto dbpinfo = _dbps.find(dbpname.value);
+
+    if (dbpinfo == _dbps.end())
+    {
+        cregdbp(dbpname.value);
+
+        _dbps.emplace(dbpname, [&](dbp_info &info) {
+            info.owner = dbpname;
+            info.url = url;
+            info.steemid = steemid;
+            info.last_claim_time = current_time_point();
+        });
+    }
+    else
+    {
+        _dbps.modify(dbpinfo, eosio::same_payer, [&](dbp_info &info) {
+            info.owner = dbpname;
+            info.url = url;
+            info.steemid = steemid;
+            info.last_claim_time = current_time_point();
+        });
+    }
 }
 
 void system_contract::unregdbp(const name dbpname)
@@ -146,7 +160,7 @@ void system_contract::update_elected_producers(uint32_t head_block_number)
             producers.push_back(item.first);
 
         auto packed_schedule = pack(producers);
-        
+
         if (set_proposed_producers(packed_schedule.data(),
                                    packed_schedule.size()) >= 0)
         {
@@ -219,10 +233,10 @@ bool system_contract::verify(const std::string wood,
 }
 
 void system_contract::update_vote(const name voter_name,
-                                 const name wood_owner_name,
-                                 const std::string wood,
-                                 const uint32_t block_number,
-                                 const name producer_name)
+                                  const name wood_owner_name,
+                                  const std::string wood,
+                                  const uint32_t block_number,
+                                  const name producer_name)
 {
     // validate input
     eosio_assert(producer_name.value > 0, "cannot vote with no producer");

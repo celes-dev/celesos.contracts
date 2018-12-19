@@ -171,6 +171,8 @@ struct [[ eosio::table, eosio::contract("celesos.system") ]] producer_info
 struct [[ eosio::table, eosio::contract("celesos.system") ]] dbp_info
 {
     name owner;
+    std::string url;
+    std::string steemid;
     time_point last_claim_time;
 
     uint64_t primary_key() const { return owner.value; }
@@ -456,7 +458,7 @@ class [[eosio::contract("celesos.system")]] system_contract : public native
 
     [[eosio::action]] void bidrefund(name bidder, name newname);
 
-    [[eosio::action]] void regdbp(const name dbpname);
+    [[eosio::action]] void regdbp(const name dbpname, std::string url, std::string steemid);
 
     [[eosio::action]] void unregdbp(const name dbpname);
 
