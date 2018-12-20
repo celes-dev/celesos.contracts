@@ -22,11 +22,11 @@
 #define ORIGIN_REWARD_NUMBER_WPAY 5000
 #define ORIGIN_REWARD_NUMBER_DPAY 5000
 
-#define DAPP_PAY_UNACTIVE 1000 * 10000
-
 // #ifdef DEBUG
 
-#define TARGET_WOOD_NUMBER 120
+#define DAPP_PAY_UNACTIVE 5 * 10000
+
+#define TARGET_WOOD_NUMBER 60
 // number of bp,BP个数
 #define BP_COUNT 9
 // when the bp count is ok cycle for this number,the active the network(主网启动条件，BP个数达标轮数）
@@ -42,6 +42,7 @@
 
 // #define TARGET_WOOD_NUMBER 300
 
+//#define DAPP_PAY_UNACTIVE 1000 * 10000
 // // number of bp,BP个数
 // #define BP_COUNT 21
 // // when the bp count is ok cycle for this number,the active the network(主网启动条件，BP个数达标轮数）
