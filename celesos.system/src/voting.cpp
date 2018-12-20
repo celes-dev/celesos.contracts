@@ -101,6 +101,8 @@ void system_contract::regdbp(const name dbpname, std::string url, std::string st
             info.last_claim_time = current_time_point();
         });
     }
+
+    _gstate.total_dbp_count++;
 }
 
 void system_contract::unregdbp(const name dbpname)
@@ -110,6 +112,8 @@ void system_contract::unregdbp(const name dbpname)
     eosio_assert(dbp != _dbps.end(), "dbp is not exist");
     _dbps.erase(dbp);
     cunregdbp(dbpname.value);
+
+    _gstate.total_dbp_count--;
 }
 
 void system_contract::update_elected_producers(uint32_t head_block_number)
