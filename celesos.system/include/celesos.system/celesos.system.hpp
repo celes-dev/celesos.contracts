@@ -124,9 +124,10 @@ struct[[ eosio::table("global"), eosio::contract("celesos.system") ]] eosio_glob
 
     // explicit serialization macro is not necessary, used here only to improve compilation time
     EOSLIB_SERIALIZE_DERIVED(eosio_global_state, eosio::blockchain_parameters,
-                             (max_ram_size)(total_ram_bytes_reserved)(total_ram_stake)(last_producer_schedule_block)(total_unpaid_block_fee)(total_unpaid_wood)
+                             (max_ram_size)(total_ram_bytes_reserved)(total_ram_stake)
+                             (last_producer_schedule_block)(total_unpaid_block_fee)(total_unpaid_wood)
                              (total_activated_stake)(last_producer_schedule_size)(last_name_close)(is_network_active)(active_touch_count)(last_account)
-                             (new_ram_per_block)(last_ram_increase)(last_block_num)(reserved)(revision)(total_wood)(total_unpaid_wood)(total_dbp_count)
+                             (new_ram_per_block)(last_ram_increase)(last_block_num)(reserved)(revision)(total_wood)(total_wood)(total_dbp_count)
                              (is_dbp_active))
 };
 
