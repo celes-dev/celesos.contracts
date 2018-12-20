@@ -106,7 +106,6 @@ struct[[ eosio::table("global"), eosio::contract("celesos.system") ]] eosio_glob
     uint32_t last_producer_schedule_block;
     uint64_t total_unpaid_block_fee = 0; /// all blocks which have been produced but not paid
     uint32_t total_unpaid_wood = 0;
-    int64_t total_activated_stake = 0;
     uint16_t last_producer_schedule_size = 0;
     block_timestamp last_name_close;
     bool is_network_active = false;
@@ -127,9 +126,9 @@ struct[[ eosio::table("global"), eosio::contract("celesos.system") ]] eosio_glob
     EOSLIB_SERIALIZE_DERIVED(eosio_global_state, eosio::blockchain_parameters,
                              (max_ram_size)(total_ram_bytes_reserved)(total_ram_stake)
                              (last_producer_schedule_block)(total_unpaid_block_fee)(total_unpaid_wood)
-                             (total_activated_stake)(last_producer_schedule_size)(last_name_close)(is_network_active)(active_touch_count)(last_account)
-                             (new_ram_per_block)(last_ram_increase)(last_block_num)(reserved)(revision)(total_wood)(total_wood)(total_dbp_count)
-                             (is_dbp_active))
+                             (last_producer_schedule_size)(last_name_close)(is_network_active)(active_touch_count)(last_account)
+                             (new_ram_per_block)(last_ram_increase)(last_block_num)(reserved)(revision)(total_wood)(total_dbp_count)(is_dbp_active)
+    )
 };
 
 struct [[ eosio::table, eosio::contract("celesos.system") ]] producer_info

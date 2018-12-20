@@ -587,8 +587,6 @@ void system_contract::undelegatebw(name from, name receiver,
     eosio_assert(unstake_cpu_quantity >= zero_asset, "must unstake a positive amount");
     eosio_assert(unstake_net_quantity >= zero_asset, "must unstake a positive amount");
     eosio_assert(unstake_cpu_quantity.amount + unstake_net_quantity.amount > 0, "must unstake a positive amount");
-    // eosio_assert(_gstate.total_activated_stake >= min_activated_stake,
-    //              "cannot undelegate bandwidth until the chain is activated (at least 15% of all tokens participate in voting)");
 
     eosio_assert(_gstate.is_network_active,
                  "cannot undelegate bandwidth until the chain is activated");

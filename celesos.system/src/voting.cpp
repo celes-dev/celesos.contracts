@@ -325,9 +325,6 @@ void system_contract::update_vote(const name voter_name,
         }
     }
 
-    // 记录总计投票数
-    _gstate.total_activated_stake++;
-
     {
         uint32_t head_block_number = get_chain_head_num();
 
