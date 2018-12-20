@@ -238,6 +238,13 @@ void system_contract::update_vote(const name voter_name,
                                   const uint32_t block_number,
                                   const name producer_name)
 {
+    eosio::print("\r\n\t\t\tvoter_name:",voter_name);
+    eosio::print("\r\n\t\t\twood_owner_name:",wood_owner_name);
+    eosio::print("\r\n\t\t\twood:",wood);
+    eosio::print("\r\n\t\t\tblock_number:",block_number);
+    eosio::print("\r\n\t\t\tproducer_name:",producer_name);
+
+
     // validate input
     eosio_assert(producer_name.value > 0, "cannot vote with no producer");
     eosio_assert(wood.length() > 0, "invalid wood 2");
