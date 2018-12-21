@@ -2,6 +2,8 @@
 #include <celes.token/celes.token.hpp>
 #include <math.h>
 
+#define	MAX(a,b) (((a)>(b))?(a):(b))
+
 namespace celesos
 {
 
@@ -30,35 +32,43 @@ void system_contract::onblock(ignore<block_header>)
         {
             {
                 asset btoken_balance = celes::token::get_balance(token_account, bpaypool_account, core_symbol().code());
-                uint32_t bhalftime = static_cast<uint32_t>(log(BPAY_POOL_FULL / btoken_balance.amount) / log(2));
-                int64_t bpayamount = static_cast<uint32_t>(ORIGIN_REWARD_NUMBER_BPAY * pow(0.5, bhalftime));
+                if (btoken_balance.amount > 0)
+                {
+                    uint32_t bhalftime = static_cast<uint32_t>(log(BPAY_POOL_FULL / btoken_balance.amount) / log(2));
+                    int64_t bpayamount = MAX(1,static_cast<int64_t>(ORIGIN_REWARD_NUMBER_BPAY * pow(0.5, bhalftime)));
 
-                INLINE_ACTION_SENDER(celes::token, transfer)
-                (token_account, {{bpaypool_account, active_permission}, {bpay_account, active_permission}}, {bpaypool_account, bpay_account, asset(bpayamount, core_symbol()), "block pay pool"});
+                    INLINE_ACTION_SENDER(celes::token, transfer)
+                    (token_account, {{bpaypool_account, active_permission}, {bpay_account, active_permission}}, {bpaypool_account, bpay_account, asset(bpayamount, core_symbol()), "block pay pool"});
 
-                _gstate.total_unpaid_block_fee = _gstate.total_unpaid_block_fee - prod->unpaid_block_fee;
-                _producers.modify(prod, eosio::same_payer, [&](auto &p) {
-                    p.unpaid_block_fee = p.unpaid_block_fee + bpayamount;
-                });
+                    _gstate.total_unpaid_block_fee = _gstate.total_unpaid_block_fee + bpayamount;
+                    _producers.modify(prod, eosio::same_payer, [&](auto &p) {
+                        p.unpaid_block_fee = p.unpaid_block_fee + bpayamount;
+                    });
+                }
             }
 
             {
                 asset wtoken_balance = celes::token::get_balance(token_account, wpaypool_account, core_symbol().code());
-                uint32_t whalftime = static_cast<uint32_t>(log(WPAY_POOL_FULL / wtoken_balance.amount) / log(2));
-                int64_t wpayamount = static_cast<uint32_t>(ORIGIN_REWARD_NUMBER_WPAY * pow(0.5, whalftime));
-                INLINE_ACTION_SENDER(celes::token, transfer)
-                (token_account, {{wpaypool_account, active_permission}, {wpay_account, active_permission}}, {wpaypool_account, wpay_account, asset(wpayamount, core_symbol()), "wood pay pool"});
+                if (wtoken_balance.amount > 0)
+                {
+                    uint32_t whalftime = static_cast<uint32_t>(log(WPAY_POOL_FULL / wtoken_balance.amount) / log(2));
+                    int64_t wpayamount = MAX(1, static_cast<int64_t>(ORIGIN_REWARD_NUMBER_WPAY * pow(0.5, whalftime)));
+                    INLINE_ACTION_SENDER(celes::token, transfer)
+                    (token_account, {{wpaypool_account, active_permission}, {wpay_account, active_permission}}, {wpaypool_account, wpay_account, asset(wpayamount, core_symbol()), "wood pay pool"});
+                }
             }
         }
-    }
 
-    {
-        asset dtoken_balance = celes::token::get_balance(token_account, dpaypool_account, core_symbol().code());
-        uint32_t dhalftime = static_cast<uint32_t>(log(DPAY_POOL_FULL / dtoken_balance.amount) / log(2));
-        int64_t dpayamount = static_cast<uint32_t>(ORIGIN_REWARD_NUMBER_DPAY * pow(0.5, dhalftime));
-
-        INLINE_ACTION_SENDER(celes::token, transfer)
-        (token_account, {{dpaypool_account, active_permission}, {dpay_account, active_permission}}, {dpaypool_account, dpay_account, asset(dpayamount, core_symbol()), "dbp pay pool"});
+        {
+            asset dtoken_balance = celes::token::get_balance(token_account, dpaypool_account, core_symbol().code());
+            if (dtoken_balance.amount > 0)
+            {
+                uint32_t dhalftime = static_cast<uint32_t>(log(DPAY_POOL_FULL / dtoken_balance.amount) / log(2));
+                int64_t dpayamount = MAX(1, static_cast<int64_t>(ORIGIN_REWARD_NUMBER_DPAY * pow(0.5, dhalftime)));
+                INLINE_ACTION_SENDER(celes::token, transfer)
+                (token_account, {{dpaypool_account, active_permission}, {dpay_account, active_permission}}, {dpaypool_account, dpay_account, asset(dpayamount, core_symbol()), "dbp pay pool"});
+            }
+        }
     }
 
     if (head_block_number % (uint32_t)forest_space_number() == 1)
@@ -122,6 +132,10 @@ void system_contract::claimrewards(const name owner)
         auto dbp = _dbps.find(owner.value);
         auto bppunish_info = _dbpunishs.find(owner.value);
 
+        asset bpay_balance = celes::token::get_balance(token_account, bpay_account, core_symbol().code());
+        asset wpay_balance = celes::token::get_balance(token_account, wpay_account, core_symbol().code());
+        asset dpay_balance = celes::token::get_balance(token_account, dpay_account, core_symbol().code());
+
         int32_t punishCount = (bppunish_info == _dbpunishs.end()) ? 0 : bppunish_info->punish_count;
 
         if (prod != _producers.end() && prod->is_active)
@@ -144,8 +158,10 @@ void system_contract::claimrewards(const name owner)
                 // wood fee
                 if (_gstate.total_unpaid_wood > 0 && prod->unpaid_wood > 0)
                 {
-                    asset token_balance = celes::token::get_balance(token_account, wpay_account, core_symbol().code());
-                    wpay = token_balance.amount * prod->unpaid_wood / _gstate.total_unpaid_wood;
+                    if (wpay_balance.amount > 0)
+                    {
+                        wpay = MAX(1, wpay_balance.amount * prod->unpaid_wood / _gstate.total_unpaid_wood);
+                    }
                 }
             }
         }
@@ -159,22 +175,21 @@ void system_contract::claimrewards(const name owner)
             }
             else
             {
-                asset token_balance = celes::token::get_balance(token_account, dpay_account, core_symbol().code());
                 if (_gstate.is_dbp_active)
                 {
                     int64_t all_unpaid_resouresweight = total_unpaid_resouresweight();
                     int64_t this_unpaid_resouresweight = unpaid_resouresweight(owner.value);
                     if (all_unpaid_resouresweight > 0 && this_unpaid_resouresweight > 0 && all_unpaid_resouresweight >= this_unpaid_resouresweight)
                     {
-                        dpay = token_balance.amount * this_unpaid_resouresweight / all_unpaid_resouresweight;
+                        if (dpay_balance.amount > 0)
+                        {
+                            dpay = MAX(1, dpay_balance.amount * this_unpaid_resouresweight / all_unpaid_resouresweight);
+                        }
                     }
                 }
                 else
                 {
-                    if (token_balance.amount >= DAPP_PAY_UNACTIVE)
-                    {
-                        dpay = DAPP_PAY_UNACTIVE;
-                    }
+                    dpay = DAPP_PAY_UNACTIVE;
                 }
             }
         }
@@ -186,14 +201,14 @@ void system_contract::claimrewards(const name owner)
             dpay = 0;
         }
 
-        if (bpay > 0)
+        if (bpay > 0 && bpay_balance.amount > bpay)
         {
             INLINE_ACTION_SENDER(celes::token, transfer)
             (token_account, {{bpay_account, active_permission}, {owner, active_permission}}, {bpay_account, owner, asset(bpay, core_symbol()), "unallocated inflation"});
             _gstate.total_unpaid_block_fee = _gstate.total_unpaid_block_fee - bpay;
         }
 
-        if (wpay > 0)
+        if (wpay > 0 && wpay_balance.amount > wpay)
         {
             INLINE_ACTION_SENDER(celes::token, transfer)
             (token_account, {{wpay_account, active_permission}, {owner, active_permission}}, {wpay_account, owner, asset(wpay, core_symbol()), "wood pay"});
@@ -215,19 +230,19 @@ void system_contract::claimrewards(const name owner)
             });
         }
 
-        if (dpay > 0)
+        if (dpay > 0 && dpay_balance.amount > dpay)
         {
             INLINE_ACTION_SENDER(celes::token, transfer)
             (token_account, {{dpay_account, active_permission}, {owner, active_permission}}, {dpay_account, owner, asset(dpay, core_symbol()), "dapp pay"});
 
             setclaimed(owner.value);
+        }
 
-            if (dbp != _dbps.end())
-            {
-                _dbps.modify(dbp, eosio::same_payer, [&](auto &p) {
-                    p.last_claim_time = ct;
-                });
-            }
+        if (dbp != _dbps.end())
+        {
+            _dbps.modify(dbp, eosio::same_payer, [&](auto &p) {
+                p.last_claim_time = ct;
+            });
         }
 
         if (punishCount > 0)

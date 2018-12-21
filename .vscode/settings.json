@@ -37,7 +37,8 @@
         "istream": "cpp",
         "variant": "cpp",
         "set": "cpp",
-        "complex": "cpp"
+        "complex": "cpp",
+        "list": "cpp"
     },
     "C_Cpp.configurationWarnings": "Disabled"
 }
