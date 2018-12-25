@@ -2,6 +2,7 @@
 #include <eosiolib/action.hpp>
 #include <eosiolib/permission.hpp>
 #include <eosiolib/crypto.hpp>
+#include <eosiolib/privileged.hpp>
 
 namespace celesos
 {
@@ -178,52 +179,58 @@ void multisig::exec(eosio::name proposer, eosio::name proposal_name, eosio::name
 
    proptable.erase(prop);
 
-   if (is_systemaccount_transaction(prop.packed_transaction.data(), prop.packed_transaction.size()))
-   {
-      std::vector<eosio::permission_level> this_punishs;
+   // if (is_systemaccount_transaction(prop.packed_transaction.data(), prop.packed_transaction.size()))
+   // {
+   //    std::vector<eosio::permission_level> this_punishs;
 
-      for (auto p : requested_approvals)
-      {
-         auto result1 = find(agree_approvals.begin(), agree_approvals.end(), p);
-         if (result1 == agree_approvals.end())
-         {
-            auto result2 = find(abstain_approvals.begin(), abstain_approvals.end(), p);
-            if (result2 == abstain_approvals.end())
-            {
-               auto result3 = find(disagree_approvals.begin(), disagree_approvals.end(), p);
-               if (result3 == disagree_approvals.end())
-               {
-                  this_punishs.emplace_back(std::move(p));
-               }
-            }
-         }
-      }
+   //    for (auto p : requested_approvals)
+   //    {
+   //       auto result1 = find(agree_approvals.begin(), agree_approvals.end(), p);
+   //       if (result1 == agree_approvals.end())
+   //       {
+   //          auto result2 = find(abstain_approvals.begin(), abstain_approvals.end(), p);
+   //          if (result2 == abstain_approvals.end())
+   //          {
+   //             auto result3 = find(disagree_approvals.begin(), disagree_approvals.end(), p);
+   //             if (result3 == disagree_approvals.end())
+   //             {
+   //                this_punishs.emplace_back(std::move(p));
+   //             }
+   //          }
+   //       }
+   //    }
 
-      bp_punish_table bp_punishs(_self, _self.value);
-      auto itr = bp_punishs.begin();
+   //    bp_punish_table bp_punishs(_self, _self.value);
+   //    auto itr = bp_punishs.begin();
 
-      if (itr != bp_punishs.end())
-      {
-         for (auto p : this_punishs)
-         {
-            auto result = find(itr->last_punish_bps.begin(), itr->last_punish_bps.end(), p);
-            if (result != last_punish_bps.end())
-            {
-               INLINE_ACTION_SENDER(celesos::system_contract, limitbp)
-               (
-                   config::system_account_name, {{config::system_account_name, active_permission}},
-                   {result.actor.name});
-            }
-         }
+   //    if (itr != bp_punishs.end())
+   //    {
+   //       for (auto p : this_punishs)
+   //       {
+   //          auto last = itr->last_punish_bps;
+   //          auto result = find(last.begin(), last.end(), p);
+   //          if (result != last.end())
+   //          {
+   //             // INLINE_ACTION_SENDER(celesos::system_contract, limitbp)
+   //             // (
+   //             //     config::system_account_name, {{config::system_account_name, active_permission}},
+   //             //     {});
+   //             eosio::action(
+   //                 eosio::permission_level{_self, "active"_n},
+   //                 "celes"_n, "limitbp"_n, //调用 eosio.token 的 Transfer 合约
+   //                 std::make_tuple(result->actor))
+   //                 .send();
+   //          }
+   //       }
 
-         bp_punishs.erase(itr);
-      }
+   //       bp_punishs.erase(itr);
+   //    }
 
-      bp_punishs.emplace(config::system_account_name, [&](auto &a) {
-         a.proposal_name = proposal_name;
-         a.last_punish_bps = this_punishs;
-      });
-   }
+   //    bp_punishs.emplace(_self, [&](auto &a) {
+   //       a.proposal_name = proposal_name;
+   //       a.last_punish_bps = this_punishs;
+   //    });
+   // }
 }
 
 void multisig::invalidate(eosio::name account)
