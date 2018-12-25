@@ -74,6 +74,8 @@ namespace celesos {
          };
 
          typedef eosio::multi_index<"bppunish"_n, bp_punish_info> bp_punish_table;
+
+         bool approvalsearch(std::vector<approval>  approvals, approval thisapproval);
    };
 
 } /// celesos eosio
