@@ -5,7 +5,7 @@
 
 namespace celesos {
 
-   class [[eosio::contract("eosio.msig")]] multisig : public eosio::contract {
+   class [[eosio::contract("celesos.msig")]] multisig : public eosio::contract {
       public:
          using contract::contract;
 
@@ -54,7 +54,7 @@ namespace celesos {
 
             uint64_t primary_key()const { return proposal_name.value; }
          };
-         typedef eosio::multi_index< "approvals2"_n, approvals_info > approvals;
+         typedef eosio::multi_index< "approvals"_n, approvals_info > approvals;
 
          struct [[eosio::table]] invalidation {
             eosio::name        account;

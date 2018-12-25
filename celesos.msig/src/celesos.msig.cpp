@@ -263,4 +263,4 @@ bool multisig::approvalsearch(std::vector<approval> approvals, approval thisappr
 
 } // namespace celesos
 
-EOSIO_DISPATCH(celesos::multisig, (propose)(approve)(unapprove)(cancel)(exec)(invalidate))
+EOSIO_DISPATCH(celesos::multisig, (propose)(approve)(unapprove)(abstain)(cancel)(exec)(invalidate))
