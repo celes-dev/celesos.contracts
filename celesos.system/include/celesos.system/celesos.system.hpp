@@ -169,7 +169,7 @@ struct [[ eosio::table, eosio::contract("celesos.system") ]] dbp_info
     uint64_t primary_key() const { return owner.value; }
 
     // explicit serialization macro is not necessary, used here only to improve compilation time
-    EOSLIB_SERIALIZE(dbp_info, (owner)(last_claim_time))
+    EOSLIB_SERIALIZE(dbp_info, (owner)(url)(steemid)(last_claim_time))
 };
 
 struct [[ eosio::table, eosio::contract("celesos.system") ]] bp_punish_info
@@ -297,7 +297,7 @@ struct [[ eosio::table, eosio::contract("celesos.system") ]] wood_burn_block_sta
 
 typedef eosio::multi_index<"voters"_n, voter_info> voters_table;
 
-typedef eosio::multi_index<"dbp"_n, dbp_info> dbps_table;
+typedef eosio::multi_index<"dbps"_n, dbp_info> dbps_table;
 
 typedef eosio::multi_index<"bppunish"_n, bp_punish_info> bp_punish_table;
 

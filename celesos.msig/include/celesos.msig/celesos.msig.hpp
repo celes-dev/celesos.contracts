@@ -18,6 +18,8 @@ namespace celesos {
          [[eosio::action]]
          void unapprove( eosio::name proposer, eosio::name proposal_name, eosio::permission_level level );
          [[eosio::action]]
+         void abstain( eosio::name proposer, eosio::name proposal_name, eosio::permission_level level );
+         [[eosio::action]]
          void cancel( eosio::name proposer, eosio::name proposal_name, eosio::name canceler );
          [[eosio::action]]
          void exec( eosio::name proposer, eosio::name proposal_name, eosio::name executer );
@@ -34,15 +36,6 @@ namespace celesos {
 
          typedef eosio::multi_index< "proposal"_n, proposal > proposals;
 
-         struct [[eosio::table]] old_approvals_info {
-            eosio::name                           proposal_name;
-            std::vector<eosio::permission_level>   requested_approvals;
-            std::vector<eosio::permission_level>   provided_approvals;
-
-            uint64_t primary_key()const { return proposal_name.value; }
-         };
-         typedef eosio::multi_index< "approvals"_n, old_approvals_info > old_approvals;
-
          struct approval {
             eosio::permission_level level;
             eosio::time_point       time;
@@ -55,7 +48,9 @@ namespace celesos {
             //to be of exact the same size ad provided approval, in this case approve/unapprove
             //doesn't change serialized data size. So, we use the same type.
             std::vector<approval>   requested_approvals;
-            std::vector<approval>   provided_approvals;
+            std::vector<approval>   agree_approvals;
+            std::vector<approval>   abstain_approvals;
+            std::vector<approval>   disagree_approvals;
 
             uint64_t primary_key()const { return proposal_name.value; }
          };
@@ -69,6 +64,16 @@ namespace celesos {
          };
 
          typedef eosio::multi_index< "invals"_n, invalidation > invalidations;
+
+
+         struct [[eosio::table]] bp_punish_info {
+            eosio::name                   proposal_name;
+            std::vector<eosio::permission_level>   last_punish_bps;
+
+            uint64_t primary_key()const { return proposal_name.value; }
+         };
+
+         typedef eosio::multi_index<"bppunish"_n, bp_punish_info> bp_punish_table;
    };
 
 } /// celesos eosio

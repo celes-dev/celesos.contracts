@@ -38,7 +38,10 @@
         "variant": "cpp",
         "set": "cpp",
         "complex": "cpp",
-        "list": "cpp"
+        "list": "cpp",
+        "__split_buffer": "cpp",
+        "*.ipp": "cpp",
+        "__locale": "cpp"
     },
     "C_Cpp.configurationWarnings": "Disabled"
 }
