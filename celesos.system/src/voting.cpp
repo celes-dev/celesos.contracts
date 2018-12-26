@@ -78,7 +78,15 @@ void system_contract::unregprod(const name producer)
 
 void system_contract::regdbp(const name dbpname, std::string url, std::string steemid)
 {
-    require_auth(dbp_account);
+    if(_gstate.is_dbp_active)
+    {
+        require_auth(dbpname);
+    }
+    else
+    {
+        require_auth(dbp_account);
+    }
+    
     auto dbpinfo = _dbps.find(dbpname.value);
 
     if (dbpinfo == _dbps.end())
@@ -118,7 +126,6 @@ void system_contract::unregdbp(const name dbpname)
 
 void system_contract::update_elected_producers(uint32_t head_block_number)
 {
-
     _gstate.last_producer_schedule_block = head_block_number;
 
     auto idx = _producers.get_index<"prototalvote"_n>();
