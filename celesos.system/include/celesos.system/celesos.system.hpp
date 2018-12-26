@@ -24,7 +24,7 @@
 
 // #ifdef DEBUG
 
-#define DAPP_PAY_UNACTIVE 5 * 10000
+#define DAPP_PAY_UNACTIVE 15 * 10000
 
 #define TARGET_WOOD_NUMBER 60
 // number of bp,BP个数
