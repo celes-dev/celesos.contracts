@@ -2,7 +2,7 @@
 #include <celes.token/celes.token.hpp>
 #include <math.h>
 
-#define	MAX(a,b) (((a)>(b))?(a):(b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 namespace celesos
 {
@@ -35,7 +35,7 @@ void system_contract::onblock(ignore<block_header>)
                 if (btoken_balance.amount > 0)
                 {
                     uint32_t bhalftime = static_cast<uint32_t>(log(BPAY_POOL_FULL / btoken_balance.amount) / log(2));
-                    int64_t bpayamount = MAX(1,static_cast<int64_t>(ORIGIN_REWARD_NUMBER_BPAY * pow(0.5, bhalftime)));
+                    int64_t bpayamount = MAX(1, static_cast<int64_t>(ORIGIN_REWARD_NUMBER_BPAY * pow(0.5, bhalftime)));
 
                     INLINE_ACTION_SENDER(celes::token, transfer)
                     (token_account, {{bpaypool_account, active_permission}, {bpay_account, active_permission}}, {bpaypool_account, bpay_account, asset(bpayamount, core_symbol()), "block pay pool"});
@@ -113,6 +113,14 @@ void system_contract::onblock(ignore<block_header>)
     }
 
     ramattenuator();
+
+    if (!_gstate.is_dbp_active)
+    {
+        if (head_block_number - _gstate.network_active_block >= DBP_ACTIVE_SEP)
+        {
+            _gstate.is_dbp_active = true;
+        }
+    }
 }
 
 using namespace eosio;
@@ -287,6 +295,15 @@ void system_contract::unlimitbp(const name &owner_name)
     {
         _dbpunishs.erase(bppunish_info);
     }
+}
+
+void system_contract::activedbp()
+{
+    require_auth(_self);
+
+    eosio_assert(!_gstate.is_dbp_active, "dbp is actived");
+    eosio_assert(_gstate.is_network_active, "network is not actived");
+    _gstate.is_dbp_active = true;
 }
 
 } //namespace celesos

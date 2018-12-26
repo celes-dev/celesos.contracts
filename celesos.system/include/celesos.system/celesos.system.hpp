@@ -38,6 +38,8 @@
 // singing ticker sep（唱票间隔期，每隔固定时间进行唱票）
 #define SINGING_TICKER_SEP 1 * 2 * 6 * 10
 
+#define DBP_ACTIVE_SEP 300
+
 // #else
 
 // #define TARGET_WOOD_NUMBER 300
@@ -53,6 +55,8 @@
 // #define REWARD_TIME_SEP 6 * 60 * 60 * uint64_t(1000000)
 // // singing ticker sep（唱票间隔期，每隔固定时间进行唱票）
 // #define SINGING_TICKER_SEP BP_COUNT * 6 * 60
+// #define DBP_ACTIVE_SEP 180 * 24 * 60 * 60 * 2
+
 
 // #endif
 
@@ -111,6 +115,7 @@ struct[[ eosio::table("global"), eosio::contract("celesos.system") ]] eosio_glob
     bool is_network_active = false;
     uint16_t active_touch_count = 0;
     uint64_t last_account = 0;
+    uint32_t network_active_block = 0;
 
     uint16_t new_ram_per_block = 0;
     block_timestamp last_ram_increase;
@@ -126,7 +131,7 @@ struct[[ eosio::table("global"), eosio::contract("celesos.system") ]] eosio_glob
     EOSLIB_SERIALIZE_DERIVED(eosio_global_state, eosio::blockchain_parameters,
                              (max_ram_size)(total_ram_bytes_reserved)(total_ram_stake)
                              (last_producer_schedule_block)(total_unpaid_block_fee)(total_unpaid_wood)
-                             (last_producer_schedule_size)(last_name_close)(is_network_active)(active_touch_count)(last_account)
+                             (last_producer_schedule_size)(last_name_close)(is_network_active)(active_touch_count)(last_account)(network_active_block)
                              (new_ram_per_block)(last_ram_increase)(last_block_num)(reserved)(revision)(total_wood)(total_dbp_count)(is_dbp_active)
     )
 };
@@ -457,6 +462,8 @@ class [[eosio::contract("celesos.system")]] system_contract : public native
 
     [[eosio::action]] void limitbp(const name &owner_name);
     [[eosio::action]] void unlimitbp(const name &owner_name);
+
+    [[eosio::action]] void activedbp();
 
   private:
     // Implementation details:

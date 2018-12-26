@@ -338,10 +338,10 @@ EOSIO_DISPATCH(celesos::system_contract,
                // celesos.system.cpp
                (init)(setalimits)(setram)(setramrate)(setparams)(setpriv)(rmvproducer)(updtrevision)(bidname)(bidrefund)
                // producer_pay.cpp
-               (onblock)(claimrewards)
+               (onblock)(claimrewards)(limitbp)(unlimitbp)(activedbp)
                // delegate_bandwidth.cpp
                (delegatebw)(undelegatebw)(buyrambytes)(buyram)(sellram)(refund)
                // voting.cpp
-               (regproducer)(unregprod)(regproxy)(regdbp)(unregdbp)(setproxy)(voteproducer)(limitbp)(unlimitbp)
+               (regproducer)(unregprod)(regproxy)(regdbp)(unregdbp)(setproxy)(voteproducer)
                // native.hpp (newaccount definition is actually in celesos.system.cpp)
                (newaccount)(updateauth)(deleteauth)(linkauth)(unlinkauth)(canceldelay)(onerror)(setabi))

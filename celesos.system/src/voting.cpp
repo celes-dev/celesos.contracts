@@ -149,6 +149,7 @@ void system_contract::update_elected_producers(uint32_t head_block_number)
         if (_gstate.active_touch_count >= ACTIVE_NETWORK_CYCLE)
         {
             _gstate.is_network_active = true;
+            _gstate.network_active_block = head_block_number;
         }
     }
 
