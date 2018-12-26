@@ -30,7 +30,7 @@
 // number of bp,BP个数
 #define BP_COUNT 9
 // when the bp count is ok cycle for this number,the active the network(主网启动条件，BP个数达标轮数）
-#define ACTIVE_NETWORK_CYCLE 3
+#define ACTIVE_NETWORK_CYCLE 1
 // reward get min（if smaller than this number，you can't get the reward）最小奖励领取数，低于此数字将领取失败
 #define REWARD_GET_MIN 100000
 // get reward time sep(奖励领取间隔时间，单位：秒）
