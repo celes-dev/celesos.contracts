@@ -304,6 +304,7 @@ void system_contract::activedbp()
     eosio_assert(!_gstate.is_dbp_active, "dbp is actived");
     eosio_assert(_gstate.is_network_active, "network is not actived");
     _gstate.is_dbp_active = true;
+    _gstate.dbp_active_block = get_chain_head_num();
 }
 
 } //namespace celesos
