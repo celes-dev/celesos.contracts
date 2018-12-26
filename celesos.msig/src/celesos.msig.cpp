@@ -74,14 +74,27 @@ void multisig::approve(eosio::name proposer, eosio::name proposal_name, eosio::p
    }
 
    approvals apptable(_self, proposer.value);
-   auto apps_it = apptable.get(proposal_name.value, "proposal not found");
+   auto &apps_it = apptable.get(proposal_name.value, "proposal not found");
    auto itr = std::find_if(apps_it.requested_approvals.begin(), apps_it.requested_approvals.end(), [&](const approval &a) { return a.level == level; });
    eosio_assert(itr != apps_it.requested_approvals.end(), "approval is not on the list of requested approvals");
 
    apptable.modify(apps_it, proposer, [&](auto &a) {
       a.agree_approvals.push_back(approval{level, current_time_point()});
-      a.abstain_approvals.erase(itr);
-      a.disagree_approvals.erase(itr);
+
+      {
+         auto temp = std::find_if(a.abstain_approvals.begin(), a.abstain_approvals.end(), [&](const approval &a) { return a.level == level; });
+         if (temp != a.abstain_approvals.end())
+         {
+            a.abstain_approvals.erase(temp);
+         }
+      }
+      {
+         auto temp = std::find_if(a.disagree_approvals.begin(), a.disagree_approvals.end(), [&](const approval &a) { return a.level == level; });
+         if (temp != a.disagree_approvals.end())
+         {
+            a.disagree_approvals.erase(temp);
+         }
+      }
    });
 }
 
@@ -90,14 +103,27 @@ void multisig::abstain(eosio::name proposer, eosio::name proposal_name, eosio::p
    require_auth(level);
 
    approvals apptable(_self, proposer.value);
-   auto apps_it = apptable.get(proposal_name.value, "proposal not found");
+   auto &apps_it = apptable.get(proposal_name.value, "proposal not found");
    auto itr = std::find_if(apps_it.requested_approvals.begin(), apps_it.requested_approvals.end(), [&](const approval &a) { return a.level == level; });
    eosio_assert(itr != apps_it.requested_approvals.end(), "approval is not on the list of requested approvals");
 
    apptable.modify(apps_it, proposer, [&](auto &a) {
-      a.agree_approvals.erase(itr);
       a.abstain_approvals.push_back(approval{level, current_time_point()});
-      a.disagree_approvals.erase(itr);
+
+      {
+         auto temp = std::find_if(a.agree_approvals.begin(), a.agree_approvals.end(), [&](const approval &a) { return a.level == level; });
+         if (temp != a.agree_approvals.end())
+         {
+            a.agree_approvals.erase(temp);
+         }
+      }
+      {
+         auto temp = std::find_if(a.disagree_approvals.begin(), a.disagree_approvals.end(), [&](const approval &a) { return a.level == level; });
+         if (temp != a.disagree_approvals.end())
+         {
+            a.disagree_approvals.erase(temp);
+         }
+      }
    });
 }
 
@@ -106,12 +132,26 @@ void multisig::unapprove(eosio::name proposer, eosio::name proposal_name, eosio:
    require_auth(level);
 
    approvals apptable(_self, proposer.value);
-   auto apps_it = apptable.get(proposal_name.value, "proposal not found");
+   auto &apps_it = apptable.get(proposal_name.value, "proposal not found");
    auto itr = std::find_if(apps_it.agree_approvals.begin(), apps_it.agree_approvals.end(), [&](const approval &a) { return a.level == level; });
    eosio_assert(itr != apps_it.agree_approvals.end(), "no approval previously granted");
    apptable.modify(apps_it, proposer, [&](auto &a) {
-      a.agree_approvals.erase(itr);
-      a.abstain_approvals.erase(itr);
+      {
+         auto temp = std::find_if(a.agree_approvals.begin(), a.agree_approvals.end(), [&](const approval &a) { return a.level == level; });
+         if (temp != a.agree_approvals.end())
+         {
+            a.agree_approvals.erase(temp);
+         }
+      }
+
+      {
+         auto temp = std::find_if(a.abstain_approvals.begin(), a.abstain_approvals.end(), [&](const approval &a) { return a.level == level; });
+         if (temp != a.abstain_approvals.end())
+         {
+            a.abstain_approvals.erase(temp);
+         }
+      }
+
       a.disagree_approvals.push_back(approval{level, current_time_point()});
    });
 }
@@ -131,7 +171,7 @@ void multisig::cancel(eosio::name proposer, eosio::name proposal_name, eosio::na
 
    //remove from new table
    approvals apptable(_self, proposer.value);
-   auto apps_it = apptable.get(proposal_name.value, "proposal not found");
+   auto &apps_it = apptable.get(proposal_name.value, "proposal not found");
    apptable.erase(apps_it);
 }
 
@@ -147,7 +187,8 @@ void multisig::exec(eosio::name proposer, eosio::name proposal_name, eosio::name
    eosio_assert(trx_header.expiration >= eosio::time_point_sec(current_time_point()), "eosio::transaction expired");
 
    approvals apptable(_self, proposer.value);
-   auto apps_it = apptable.get(proposal_name.value, "proposal not found");
+   auto &apps_it = apptable.get(proposal_name.value, "proposal not found");
+
    std::vector<eosio::permission_level> approvals;
 
    invalidations inv_table(_self, _self.value);
@@ -166,8 +207,6 @@ void multisig::exec(eosio::name proposer, eosio::name proposal_name, eosio::name
    auto abstain_approvals = apps_it.abstain_approvals;
    auto disagree_approvals = apps_it.disagree_approvals;
 
-   apptable.erase(apps_it);
-
    auto packed_agree_approvals = pack(approvals);
    auto res = ::check_transaction_authorization(prop.packed_transaction.data(), prop.packed_transaction.size(),
                                                 (const char *)0, 0,
@@ -176,8 +215,6 @@ void multisig::exec(eosio::name proposer, eosio::name proposal_name, eosio::name
 
    send_deferred((uint128_t(proposer.value) << 64) | proposal_name.value, executer.value,
                  prop.packed_transaction.data(), prop.packed_transaction.size());
-
-   proptable.erase(prop);
 
    if (is_systemaccount_transaction(prop.packed_transaction.data(), prop.packed_transaction.size()))
    {
@@ -202,12 +239,8 @@ void multisig::exec(eosio::name proposer, eosio::name proposal_name, eosio::name
             auto result = find(last.begin(), last.end(), p);
             if (result != last.end())
             {
-               // INLINE_ACTION_SENDER(celesos::system_contract, limitbp)
-               // (
-               //     config::system_account_name, {{config::system_account_name, active_permission}},
-               //     {});
                eosio::action(
-                   eosio::permission_level{_self, "active"_n},
+                   eosio::permission_level{"celes"_n, "active"_n},
                    "celes"_n, "limitbp"_n, //调用 eosio.token 的 Transfer 合约
                    std::make_tuple(result->actor))
                    .send();
@@ -216,6 +249,10 @@ void multisig::exec(eosio::name proposer, eosio::name proposal_name, eosio::name
 
          bp_punishs.erase(itr);
       }
+
+      proptable.erase(prop);
+
+      apptable.erase(apps_it);
 
       bp_punishs.emplace(_self, [&](auto &a) {
          a.proposal_name = proposal_name;

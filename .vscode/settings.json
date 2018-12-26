@@ -41,7 +41,10 @@
         "list": "cpp",
         "__split_buffer": "cpp",
         "*.ipp": "cpp",
-        "__locale": "cpp"
+        "__locale": "cpp",
+        "array": "cpp",
+        "thread": "cpp",
+        "utility": "cpp"
     },
     "C_Cpp.configurationWarnings": "Disabled"
 }
