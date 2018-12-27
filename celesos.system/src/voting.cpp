@@ -240,7 +240,8 @@ bool system_contract::verify(const std::string wood,
 
         itl++;
     }
-
+    uint64_t block_random = block_random_by_num(block_number);
+    eosio::print("\r\n\t\t\tblock_random_by_num:",block_random);
     return verify_wood(block_number, wood_owner_name.value, wood.c_str());
 }
 
