@@ -14,6 +14,7 @@
 #include <eosiolib/singleton.hpp>
 #include <eosiolib/transaction.hpp>
 #include <celes.token/celes.token.hpp>
+#include <eosiolib/system.h>
 
 namespace celesos
 {
