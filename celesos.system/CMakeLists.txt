@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(hello_example VERSION 1.0.0)
 
-find_package(eosio.cdt)
+find_package(celesos.cdt)
 
 
 add_contract(celesos.system celesos.system ${CMAKE_CURRENT_SOURCE_DIR}/src/celesos.system.cpp)
