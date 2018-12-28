@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(celesos.wrap VERSION 1.0.0)
 
-find_package(eosio.cdt)
+find_package(celesos.cdt)
 
 add_contract(celesos.test celesos.test ${CMAKE_CURRENT_SOURCE_DIR}/src/celesos.test.cpp)
 target_include_directories(celesos.test.wasm
