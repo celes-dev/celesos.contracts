@@ -27,7 +27,6 @@ using eosio::asset;
 using eosio::const_mem_fun;
 using eosio::indexed_by;
 using eosio::permission_level;
-using eosio::print;
 using eosio::time_point_sec;
 using std::map;
 using std::pair;
