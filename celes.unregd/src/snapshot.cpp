@@ -1,11 +1,20 @@
 #pragma once
 
-#include "eosio.unregd/exchange_state.hpp"
+#include "snapshot.hpp"
+#include <eosiolib/asset.hpp>
+#include <eosiolib/symbol.hpp>
+#include "types.hpp"
 
-namespace eosio {
+using celesos::rammarket;
+using eosio::asset;
+using eosio::symbol;
+using eosio::symbol_code;
+using std::vector;
+
+namespace celes {
 
 asset buyrambytes(uint32_t bytes) {
-    celesos::rammarket market{"eosio"_n, "eosio"_n.value};
+    rammarket market{"eosio"_n, "eosio"_n.value};
     auto ramcore_symbol = symbol{symbol_code{"RAMCODE"}, 4};
     auto itr = market.find(ramcore_symbol.raw());
     eosio_assert(itr != market.end(), "RAMCORE market not found");
@@ -15,7 +24,7 @@ asset buyrambytes(uint32_t bytes) {
     return tmp.convert(asset{bytes, ram_symbol}, core_symbol);
 }
 
-std::vector<asset> split_snapshot(const asset& balance) {
+vector<asset> split_snapshot(const asset& balance) {
     const auto symbol = balance.symbol;
     if (balance < asset{5000, symbol}) {
         return {};
@@ -43,11 +52,11 @@ std::vector<asset> split_snapshot(const asset& balance) {
     return {net, cpu, asset{100000, symbol}};
 }
 
-std::vector<asset> split_snapshot_abp(const asset& balance) {
+vector<asset> split_snapshot_abp(const asset& balance) {
     const auto symbol = balance.symbol;
     eosio_assert(balance >= asset{1000, symbol}, "insuficient balance");
 
-    asset floatingAmount;
+    asset floatingAmount{};
 
     if (balance > asset{110000, symbol}) {
         floatingAmount = asset{100000, symbol};
@@ -58,11 +67,10 @@ std::vector<asset> split_snapshot_abp(const asset& balance) {
     }
 
     asset to_split = balance - floatingAmount;
-
     asset split_cpu = to_split / 2;
     asset split_net = to_split - split_cpu;
 
-    return {split_net, split_cpu, floatingAmount};
+    return vector<asset>{split_net, split_cpu, floatingAmount};
 }
 
-}  // namespace eosio
+}  // namespace celes

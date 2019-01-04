@@ -1,5 +1,12 @@
 #include <cmath>
-#include <eosio.unregd/exchange_state.hpp>
+#include <eosiolib/asset.hpp>
+#include <eosiolib/symbol.hpp>
+#include "types.hpp"
+
+using eosio::asset;
+using eosio::symbol;
+using eosio::symbol_code;
+typedef double real_type;
 
 namespace celesos {
 asset exchange_state::convert_to_exchange(connector &c, asset in) {

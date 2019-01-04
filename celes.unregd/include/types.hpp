@@ -1,6 +1,8 @@
 #pragma once
 
-// #include <eosiolib/action.hpp>
+#include <eosiolib/asset.hpp>
+#include <eosiolib/multi_index.hpp>
+#include <eosiolib/permission.hpp>
 
 namespace eosio {
 struct permission_level_weight {
@@ -41,3 +43,31 @@ struct authority {
     EOSLIB_SERIALIZE(authority, (threshold)(keys)(accounts)(waits))
 };
 }  // namespace eosio
+
+namespace celesos {
+
+struct [[ eosio::table, eosio::contract("celesos.system") ]] exchange_state {
+    eosio::asset supply;
+
+    struct connector {
+        eosio::asset balance;
+        double weight = .5;
+
+        EOSLIB_SERIALIZE(connector, (balance)(weight))
+    };
+
+    connector base;
+    connector quote;
+
+    uint64_t primary_key() const { return supply.symbol.raw(); }
+
+    eosio::asset convert_to_exchange(connector & c, eosio::asset in);
+    eosio::asset convert_from_exchange(connector & c, eosio::asset in);
+    eosio::asset convert(asset from, const symbol &to);
+
+    EOSLIB_SERIALIZE(exchange_state, (supply)(base)(quote))
+};
+
+typedef eosio::multi_index<"rammarket"_n, exchange_state> rammarket;
+
+}  // namespace celesos

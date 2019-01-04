@@ -9,11 +9,9 @@
 #include <eosiolib/fixed_bytes.hpp>
 #include <eosiolib/multi_index.hpp>
 #include <eosiolib/public_key.hpp>
-#include "eosio.unregd/eosio.unregd.hpp"
 
+namespace celes {
 typedef std::string ethaddress;
-
-namespace celesos {
 
 struct [[ eosio::table, eosio::contract("celes.unregd") ]] address {
     uint64_t id;
@@ -64,6 +62,7 @@ class[[eosio::contract("celes.unregd")]] unregd : public eosio::contract {
                         const std::function<void(eosio::address &)> updater);
 
     static get_core_symbol(celesos::rammarket & market);
-    static get_core_symbol(const eosio::name system_account = celesos::unregd::system_account)
+    static get_core_symbol(const eosio::name system_account =
+                               celesos::unregd::system_account)
 };
-}  // namespace celesos
+}  // namespace celes

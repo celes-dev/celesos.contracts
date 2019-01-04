@@ -1,8 +1,9 @@
-#include "eosio.unregd/eosio.unregd.hpp"
+#include "celes.unregd/celes.unregd.hpp"
 #include <eosiolib/crypto.h>
-#include "eosio.unregd/exchange_state.hpp"
-
+#include <eosiolib/action.hpp>
 #include "abieos_numeric.hpp"
+#include "snapshot.hpp"
+#include "types.hpp"
 
 // import sha3
 #include "sha3/byte_order.h"
@@ -17,11 +18,7 @@
 // #define uECC_SUPPORT_COMPRESSED_POINT 1
 #include "ecc/uECC.h"
 
-// import utils
-#include "utils/inline_calls_helper.hpp"
-#include "utils/snapshot.hpp"
-
-using celesos::ethaddress;
+using celes::ethaddress;
 using celesos::rammarket;
 using eosio::address;
 using eosio::asset;
@@ -36,7 +33,7 @@ using std::function;
 using std::string;
 using std::vector;
 
-namespace celesos {
+namespace celes {
 
 static uint8_t hex_char_to_uint(char character) {
     const int x = character;
@@ -67,7 +64,7 @@ static fixed_bytes<32> compute_ethaddress_key256(uint8_t *ethereum_key) {
         p32[0], p32[1], p32[2], p32[3], p32[4]);
 }
 
-}  // namespace celesos
+}  // namespace celes
 
 // implement struct address methods
 fixed_bytes<32> address::by_ethaddress() {
@@ -175,7 +172,7 @@ void unregd::regaccount(const vector<char> &signature, const string &account,
             eosio_assert(false, "Invalid account name");
     }
 
-    auto naccount = eosio::name(account.c_str());
+    auto naccount = name(account.c_str());
 
     // Verify that the account does not exists
     eosio_assert(!is_account(naccount), "Account already exists");
@@ -248,29 +245,45 @@ void unregd::regaccount(const vector<char> &signature, const string &account,
                  "price of RAM too high");
 
     // Build authority with the pubkey passed as parameter
-    const auto auth = authority{
-        1, {{{(uint8_t)eos_pubkey.type, eos_pubkey.data}, 1}}, {}, {}};
-
+    authority auth{
+        .threshold = 1,
+        .keys = {key_weight{.key = public_key{.type = (uint8_t)eos_pubkey.type,
+                                              .data = eos_pubkey.data},
+                            .weight = 1}},
+        .accounts = {},
+        .waits = {}};
+    std::vector<permission_level> levels = {
+        permission_level{.actor = _self, .permission = active_permission}};
     // Create account with the same key for owner/active
-    INLINE_ACTION_SENDER(call::eosio, newaccount)
-    ("eosio"_n, {{"eosio.unregd"_n, "active"_n}},
-     {"eosio.unregd"_n, naccount, auth, auth});
+    eosio::action{.account = "celes"_n,
+                  .name = "newaccount"_n,
+                  .authorization = levels,
+                  .data = datastream::pack({_self, naccount, auth, auth})}
+        .send();
 
     // Buy RAM for this account (8k)
-    INLINE_ACTION_SENDER(call::eosio, buyram)
-    ("eosio"_n, {{"eosio.regram"_n, "active"_n}},
-     {"eosio.regram"_n, naccount, amount_to_purchase_8kb_of_RAM});
+    eosio::action{.account = "celes.regram"_n,
+                  .name = "buyram"_n,
+                  .authorization = levels,
+                  .data = datastream::pack(
+                      {_self, naccount, amount_to_purchase_8kb_of_RAM})}
+        .send();
 
     // Delegate bandwith
-    INLINE_ACTION_SENDER(call::eosio, delegatebw)
-    ("eosio"_n, {{"eosio.unregd"_n, "active"_n}},
-     {"eosio.unregd"_n, naccount, balances[0], balances[1], 1});
+    eosio::action{
+        .account = "celes"_n,
+        .name = "delegatebw"_n,
+        .authorization = levels,
+        .data = datastream::pack(_self, naccount, balance[0], balance[1], 1)}
+        .send();
 
     // Transfer remaining if any (liquid EOS)
     if (balances[2] != asset{}) {
-        INLINE_ACTION_SENDER(call::token, transfer)
-        ("eosio.token"_n, {{"eosio.unregd"_n, "active"_n}},
-         {"eosio.unregd"_n, naccount, balances[2], ""});
+        eosio::action{.account = "celes.token"_n,
+                      .name = "transfer"_n,
+                      .authorization = levels,
+                      .data = datastream::pack(_self, naccount, balance[2], "")}
+            .send()
     }
 
     // Remove information for the ETH address from the eosio.unregd DB
