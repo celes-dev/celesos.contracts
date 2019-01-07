@@ -30,9 +30,9 @@
 // number of bp,BP个数
 #define BP_COUNT 9
 // when the bp count is ok cycle for this number,the active the network(主网启动条件，BP个数达标轮数）
-#define ACTIVE_NETWORK_CYCLE 1
+#define ACTIVE_NETWORK_CYCLE 3
 // reward get min（if smaller than this number，you can't get the reward）最小奖励领取数，低于此数字将领取失败
-#define REWARD_GET_MIN 100000
+#define REWARD_GET_MIN 50 * 10000
 // get reward time sep(奖励领取间隔时间，单位：秒）
 #define REWARD_TIME_SEP 1 * 60 * uint64_t(1000000)
 // singing ticker sep（唱票间隔期，每隔固定时间进行唱票）
@@ -117,7 +117,7 @@ struct[[ eosio::table("global"), eosio::contract("celesos.system") ]] eosio_glob
     uint64_t last_account = 0;
     uint32_t network_active_block = 0;
 
-    uint16_t new_ram_per_block = 0;
+    uint16_t new_ram_per_block = 1024;
     block_timestamp last_ram_increase;
     block_timestamp last_block_num;
     double reserved = 0;
