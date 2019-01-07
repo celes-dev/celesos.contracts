@@ -117,7 +117,7 @@ struct[[ eosio::table("global"), eosio::contract("celesos.system") ]] eosio_glob
     uint64_t last_account = 0;
     uint32_t network_active_block = 0;
 
-    uint16_t new_ram_per_block = 0;
+    uint16_t new_ram_per_block = 1024;
     block_timestamp last_ram_increase;
     block_timestamp last_block_num;
     double reserved = 0;
