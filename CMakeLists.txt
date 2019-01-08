@@ -37,7 +37,7 @@ endif()
 #add_subdirectory(celesos.wrap)
 #add_subdirectory(celesos.system)
 #add_subdirectory(celesos.test)
-add_subdirectory(eosio.unregd)
+add_subdirectory(celes.unregd)
 
 if (APPLE)
    set(OPENSSL_ROOT "/usr/local/opt/openssl")
