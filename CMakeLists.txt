@@ -32,6 +32,7 @@ endif()
 
 
 add_subdirectory(celes.token)
+add_subdirectory(celes.unregd)
 add_subdirectory(celesos.bios)
 add_subdirectory(celesos.msig)
 add_subdirectory(celesos.wrap)

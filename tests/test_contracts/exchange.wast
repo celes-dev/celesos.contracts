@@ -53,7 +53,7 @@
  (import "env" "require_recipient" (func $require_recipient (param i64)))
  (import "env" "send_inline" (func $send_inline (param i32 i32)))
  (table 6 6 anyfunc)
- (elem (i32.const 0) $__wasm_nullptr $_ZN5eosio8exchange7createxEyNS_5assetEmNS_14extended_assetES2_ $_ZN5eosio8exchange4lendEyNS_11symbol_typeENS_14extended_assetE $_ZN5eosio8exchange8withdrawEyNS_14extended_assetE $_ZN5eosio8exchange6unlendEyNS_11symbol_typeEdNS_15extended_symbolE $_ZN5eosio8exchange7depositEyNS_14extended_assetE)
+ (elem (i32.const 0) $__wasm_nullptr $_ZN5eosio8exchange7createxEyNS_5assetEmNS_14extended_assetES2_ $_ZN5eosio8exchange4lendEyNS_11symbol_codeENS_14extended_assetE $_ZN5eosio8exchange8withdrawEyNS_14extended_assetE $_ZN5eosio8exchange6unlendEyNS_11symbol_codeEdNS_15extended_symbolE $_ZN5eosio8exchange7depositEyNS_14extended_assetE)
  (memory $0 1)
  (data (i32.const 4) "\b0W\00\00")
  (data (i32.const 16) "magnitude of asset amount must be less than 2^62\00")
@@ -184,7 +184,7 @@
  (export "_ZNK5eosio14exchange_state20requires_margin_callERKNS0_9connectorE" (func $_ZNK5eosio14exchange_state20requires_margin_callERKNS0_9connectorE))
  (export "_ZNK5eosio14exchange_state20requires_margin_callEv" (func $_ZNK5eosio14exchange_state20requires_margin_callEv))
  (export "_ZN5eosio17exchange_accounts14adjust_balanceEyNS_14extended_assetERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE" (func $_ZN5eosio17exchange_accounts14adjust_balanceEyNS_14extended_assetERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE))
- (export "_ZN5eosio12market_stateC2EyNS_11symbol_typeERNS_17exchange_accountsE" (func $_ZN5eosio12market_stateC2EyNS_11symbol_typeERNS_17exchange_accountsE))
+ (export "_ZN5eosio12market_stateC2EyNS_11symbol_codeERNS_17exchange_accountsE" (func $_ZN5eosio12market_stateC2EyNS_11symbol_codeERNS_17exchange_accountsE))
  (export "_ZN5eosio12market_state11margin_callENS_15extended_symbolE" (func $_ZN5eosio12market_state11margin_callENS_15extended_symbolE))
  (export "_ZN5eosio12market_state11margin_callERNS_14exchange_state9connectorERNS_11multi_indexILy10497546923563548672ENS_15margin_positionEJNS_10indexed_byILy4729653573519933440EN5boost11multi_index13const_mem_funIS5_yXadL_ZNKS5_8get_callEvEEEEEEEEE" (func $_ZN5eosio12market_state11margin_callERNS_14exchange_state9connectorERNS_11multi_indexILy10497546923563548672ENS_15margin_positionEJNS_10indexed_byILy4729653573519933440EN5boost11multi_index13const_mem_funIS5_yXadL_ZNKS5_8get_callEvEEEEEEEEE))
  (export "_ZNK5eosio12market_state13initial_stateEv" (func $_ZNK5eosio12market_state13initial_stateEv))
@@ -202,8 +202,8 @@
  (export "_ZN5eosio8exchange2onERKNS0_8upmarginE" (func $_ZN5eosio8exchange2onERKNS0_8upmarginE))
  (export "_ZN5eosio8exchange2onERKNS0_11covermarginE" (func $_ZN5eosio8exchange2onERKNS0_11covermarginE))
  (export "_ZN5eosio8exchange7createxEyNS_5assetEmNS_14extended_assetES2_" (func $_ZN5eosio8exchange7createxEyNS_5assetEmNS_14extended_assetES2_))
- (export "_ZN5eosio8exchange4lendEyNS_11symbol_typeENS_14extended_assetE" (func $_ZN5eosio8exchange4lendEyNS_11symbol_typeENS_14extended_assetE))
- (export "_ZN5eosio8exchange6unlendEyNS_11symbol_typeEdNS_15extended_symbolE" (func $_ZN5eosio8exchange6unlendEyNS_11symbol_typeEdNS_15extended_symbolE))
+ (export "_ZN5eosio8exchange4lendEyNS_11symbol_codeENS_14extended_assetE" (func $_ZN5eosio8exchange4lendEyNS_11symbol_codeENS_14extended_assetE))
+ (export "_ZN5eosio8exchange6unlendEyNS_11symbol_codeEdNS_15extended_symbolE" (func $_ZN5eosio8exchange6unlendEyNS_11symbol_codeEdNS_15extended_symbolE))
  (export "_ZN5eosio8exchange2onERKNS_8currency8transferEy" (func $_ZN5eosio8exchange2onERKNS_8currency8transferEy))
  (export "_ZN5eosio8exchange5applyEyy" (func $_ZN5eosio8exchange5applyEyy))
  (export "apply" (func $apply))
@@ -8397,7 +8397,7 @@
    )
   )
  )
- (func $_ZN5eosio12market_stateC2EyNS_11symbol_typeERNS_17exchange_accountsE (param $0 i32) (param $1 i64) (param $2 i64) (param $3 i32) (result i32)
+ (func $_ZN5eosio12market_stateC2EyNS_11symbol_codeERNS_17exchange_accountsE (param $0 i32) (param $1 i64) (param $2 i64) (param $3 i32) (result i32)
   (local $4 i32)
   (local $5 i64)
   (local $6 i64)
@@ -14847,7 +14847,7 @@
   (call $prints
    (i32.const 1264)
   )
-  (call $_ZNK5eosio11symbol_type5printEb
+  (call $_ZNK5eosio11symbol_code5printEb
    (get_local $3)
    (i32.const 1)
   )
@@ -15333,7 +15333,7 @@
    )
   )
  )
- (func $_ZNK5eosio11symbol_type5printEb (param $0 i32) (param $1 i32)
+ (func $_ZNK5eosio11symbol_code5printEb (param $0 i32) (param $1 i32)
   (local $2 i64)
   (local $3 i32)
   (i32.store offset=4
@@ -24112,7 +24112,7 @@
   (call $prints
    (i32.const 2368)
   )
-  (call $_ZNK5eosio11symbol_type5printEb
+  (call $_ZNK5eosio11symbol_code5printEb
    (get_local $1)
    (i32.const 0)
   )
@@ -30922,7 +30922,7 @@
   (call $prints
    (i32.const 2848)
   )
-  (call $_ZNK5eosio11symbol_type5printEb
+  (call $_ZNK5eosio11symbol_code5printEb
    (i32.add
     (get_local $17)
     (i32.const 208)
@@ -30948,7 +30948,7 @@
   (call $prints
    (i32.const 2864)
   )
-  (call $_ZNK5eosio11symbol_type5printEb
+  (call $_ZNK5eosio11symbol_code5printEb
    (i32.add
     (get_local $17)
     (i32.const 208)
@@ -33197,7 +33197,7 @@
   )
   (get_local $0)
  )
- (func $_ZN5eosio8exchange4lendEyNS_11symbol_typeENS_14extended_assetE (type $FUNCSIG$vijji) (param $0 i32) (param $1 i64) (param $2 i64) (param $3 i32)
+ (func $_ZN5eosio8exchange4lendEyNS_11symbol_codeENS_14extended_assetE (type $FUNCSIG$vijji) (param $0 i32) (param $1 i64) (param $2 i64) (param $3 i32)
   (local $4 i64)
   (local $5 i64)
   (local $6 i64)
@@ -33649,7 +33649,7 @@
    )
   )
  )
- (func $_ZN5eosio8exchange6unlendEyNS_11symbol_typeEdNS_15extended_symbolE (type $FUNCSIG$vijjdi) (param $0 i32) (param $1 i64) (param $2 i64) (param $3 f64) (param $4 i32)
+ (func $_ZN5eosio8exchange6unlendEyNS_11symbol_codeEdNS_15extended_symbolE (type $FUNCSIG$vijjdi) (param $0 i32) (param $1 i64) (param $2 i64) (param $3 f64) (param $4 i32)
   (local $5 i32)
   (local $6 i64)
   (local $7 i64)
@@ -35784,7 +35784,7 @@
         )
        )
        (drop
-        (call $_ZN5eosio14execute_actionINS_8exchangeES1_JyNS_11symbol_typeENS_14extended_assetEEEEbPT_MT0_FvDpT1_E
+        (call $_ZN5eosio14execute_actionINS_8exchangeES1_JyNS_11symbol_codeENS_14extended_assetEEEEbPT_MT0_FvDpT1_E
          (get_local $0)
          (i32.add
           (get_local $9)
@@ -35834,7 +35834,7 @@
       )
      )
      (drop
-      (call $_ZN5eosio14execute_actionINS_8exchangeES1_JyNS_11symbol_typeEdNS_15extended_symbolEEEEbPT_MT0_FvDpT1_E
+      (call $_ZN5eosio14execute_actionINS_8exchangeES1_JyNS_11symbol_codeEdNS_15extended_symbolEEEEbPT_MT0_FvDpT1_E
        (get_local $0)
        (i32.add
         (get_local $9)
@@ -37121,7 +37121,7 @@
   )
   (i32.const 1)
  )
- (func $_ZN5eosio14execute_actionINS_8exchangeES1_JyNS_11symbol_typeENS_14extended_assetEEEEbPT_MT0_FvDpT1_E (param $0 i32) (param $1 i32) (result i32)
+ (func $_ZN5eosio14execute_actionINS_8exchangeES1_JyNS_11symbol_codeENS_14extended_assetEEEEbPT_MT0_FvDpT1_E (param $0 i32) (param $1 i32) (result i32)
   (local $2 i32)
   (local $3 i64)
   (local $4 i64)
@@ -37206,7 +37206,7 @@
     )
    )
   )
-  (call $_ZN5eosio6unpackINSt3__15tupleIJyNS_11symbol_typeENS_14extended_assetEEEEEET_PKcj
+  (call $_ZN5eosio6unpackINSt3__15tupleIJyNS_11symbol_codeENS_14extended_assetEEEEEET_PKcj
    (i32.add
     (get_local $9)
     (i32.const 32)
@@ -37464,7 +37464,7 @@
   )
   (i32.const 1)
  )
- (func $_ZN5eosio14execute_actionINS_8exchangeES1_JyNS_11symbol_typeEdNS_15extended_symbolEEEEbPT_MT0_FvDpT1_E (param $0 i32) (param $1 i32) (result i32)
+ (func $_ZN5eosio14execute_actionINS_8exchangeES1_JyNS_11symbol_codeEdNS_15extended_symbolEEEEbPT_MT0_FvDpT1_E (param $0 i32) (param $1 i32) (result i32)
   (local $2 i32)
   (local $3 i32)
   (local $4 i64)
@@ -37600,7 +37600,7 @@
     (i32.const 24)
    )
   )
-  (call $_ZN5boost6fusion6detail17for_each_unrolledILi4EE4callINS0_18std_tuple_iteratorINSt3__15tupleIJyN5eosio11symbol_typeEdNS8_15extended_symbolEEEELi0EEEZNS8_rsINS8_10datastreamIPKcEEJyS9_dSA_EEERT_SJ_RNS7_IJDpT0_EEEEUlSJ_E_EEvRKSI_RKT0_
+  (call $_ZN5boost6fusion6detail17for_each_unrolledILi4EE4callINS0_18std_tuple_iteratorINSt3__15tupleIJyN5eosio11symbol_codeEdNS8_15extended_symbolEEEELi0EEEZNS8_rsINS8_10datastreamIPKcEEJyS9_dSA_EEERT_SJ_RNS7_IJDpT0_EEEEUlSJ_E_EEvRKSI_RKT0_
    (i32.add
     (get_local $9)
     (i32.const 80)
@@ -37910,7 +37910,7 @@
     (i32.const 68)
    )
   )
-  (call $_ZN5boost3pfr6detail19for_each_field_implINS1_14sequence_tuple5tupleIJRyRN5eosio11symbol_typeERNS6_14extended_assetESA_RmRhEEEZNS6_rsINS6_10datastreamIPKcEENS6_8exchange5tradeELPv0EEERT_SN_RT0_EUlSN_E_JLj0ELj1ELj2ELj3ELj4ELj5EEEEvSN_OSO_NSt3__116integer_sequenceIjJXspT1_EEEENSS_17integral_constantIbLb0EEE
+  (call $_ZN5boost3pfr6detail19for_each_field_implINS1_14sequence_tuple5tupleIJRyRN5eosio11symbol_codeERNS6_14extended_assetESA_RmRhEEEZNS6_rsINS6_10datastreamIPKcEENS6_8exchange5tradeELPv0EEERT_SN_RT0_EUlSN_E_JLj0ELj1ELj2ELj3ELj4ELj5EEEEvSN_OSO_NSt3__116integer_sequenceIjJXspT1_EEEENSS_17integral_constantIbLb0EEE
    (i32.add
     (get_local $4)
     (i32.const 24)
@@ -38037,7 +38037,7 @@
     (i32.const 40)
    )
   )
-  (call $_ZN5boost3pfr6detail19for_each_field_implINS1_14sequence_tuple5tupleIJRyRN5eosio11symbol_typeERNS6_14extended_assetESA_EEEZNS6_rsINS6_10datastreamIPKcEENS6_8exchange8upmarginELPv0EEERT_SL_RT0_EUlSL_E_JLj0ELj1ELj2ELj3EEEEvSL_OSM_NSt3__116integer_sequenceIjJXspT1_EEEENSQ_17integral_constantIbLb0EEE
+  (call $_ZN5boost3pfr6detail19for_each_field_implINS1_14sequence_tuple5tupleIJRyRN5eosio11symbol_codeERNS6_14extended_assetESA_EEEZNS6_rsINS6_10datastreamIPKcEENS6_8exchange8upmarginELPv0EEERT_SL_RT0_EUlSL_E_JLj0ELj1ELj2ELj3EEEEvSL_OSM_NSt3__116integer_sequenceIjJXspT1_EEEENSQ_17integral_constantIbLb0EEE
    (i32.add
     (get_local $3)
     (i32.const 32)
@@ -41173,7 +41173,7 @@
   )
   (get_local $0)
  )
- (func $_ZN5boost3pfr6detail19for_each_field_implINS1_14sequence_tuple5tupleIJRyRN5eosio11symbol_typeERNS6_14extended_assetESA_EEEZNS6_rsINS6_10datastreamIPKcEENS6_8exchange8upmarginELPv0EEERT_SL_RT0_EUlSL_E_JLj0ELj1ELj2ELj3EEEEvSL_OSM_NSt3__116integer_sequenceIjJXspT1_EEEENSQ_17integral_constantIbLb0EEE (param $0 i32) (param $1 i32)
+ (func $_ZN5boost3pfr6detail19for_each_field_implINS1_14sequence_tuple5tupleIJRyRN5eosio11symbol_codeERNS6_14extended_assetESA_EEEZNS6_rsINS6_10datastreamIPKcEENS6_8exchange8upmarginELPv0EEERT_SL_RT0_EUlSL_E_JLj0ELj1ELj2ELj3EEEEvSL_OSM_NSt3__116integer_sequenceIjJXspT1_EEEENSQ_17integral_constantIbLb0EEE (param $0 i32) (param $1 i32)
   (local $2 i32)
   (local $3 i32)
   (local $4 i32)
@@ -41722,7 +41722,7 @@
   )
   (get_local $0)
  )
- (func $_ZN5boost3pfr6detail19for_each_field_implINS1_14sequence_tuple5tupleIJRyRN5eosio11symbol_typeERNS6_14extended_assetESA_RmRhEEEZNS6_rsINS6_10datastreamIPKcEENS6_8exchange5tradeELPv0EEERT_SN_RT0_EUlSN_E_JLj0ELj1ELj2ELj3ELj4ELj5EEEEvSN_OSO_NSt3__116integer_sequenceIjJXspT1_EEEENSS_17integral_constantIbLb0EEE (param $0 i32) (param $1 i32)
+ (func $_ZN5boost3pfr6detail19for_each_field_implINS1_14sequence_tuple5tupleIJRyRN5eosio11symbol_codeERNS6_14extended_assetESA_RmRhEEEZNS6_rsINS6_10datastreamIPKcEENS6_8exchange5tradeELPv0EEERT_SN_RT0_EUlSN_E_JLj0ELj1ELj2ELj3ELj4ELj5EEEEvSN_OSO_NSt3__116integer_sequenceIjJXspT1_EEEENSS_17integral_constantIbLb0EEE (param $0 i32) (param $1 i32)
   (local $2 i32)
   (local $3 i32)
   (local $4 i32)
@@ -42110,7 +42110,7 @@
    )
   )
  )
- (func $_ZN5boost6fusion6detail17for_each_unrolledILi4EE4callINS0_18std_tuple_iteratorINSt3__15tupleIJyN5eosio11symbol_typeEdNS8_15extended_symbolEEEELi0EEEZNS8_rsINS8_10datastreamIPKcEEJyS9_dSA_EEERT_SJ_RNS7_IJDpT0_EEEEUlSJ_E_EEvRKSI_RKT0_ (param $0 i32) (param $1 i32)
+ (func $_ZN5boost6fusion6detail17for_each_unrolledILi4EE4callINS0_18std_tuple_iteratorINSt3__15tupleIJyN5eosio11symbol_codeEdNS8_15extended_symbolEEEELi0EEEZNS8_rsINS8_10datastreamIPKcEEJyS9_dSA_EEERT_SJ_RNS7_IJDpT0_EEEEUlSJ_E_EEvRKSI_RKT0_ (param $0 i32) (param $1 i32)
   (local $2 i32)
   (local $3 i32)
   (set_local $3
@@ -42312,7 +42312,7 @@
    )
   )
  )
- (func $_ZN5eosio6unpackINSt3__15tupleIJyNS_11symbol_typeENS_14extended_assetEEEEEET_PKcj (param $0 i32) (param $1 i32) (param $2 i32)
+ (func $_ZN5eosio6unpackINSt3__15tupleIJyNS_11symbol_codeENS_14extended_assetEEEEEET_PKcj (param $0 i32) (param $1 i32) (param $2 i32)
   (local $3 i32)
   (local $4 i64)
   (local $5 i32)
