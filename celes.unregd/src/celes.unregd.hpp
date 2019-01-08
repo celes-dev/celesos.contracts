@@ -9,23 +9,6 @@
 #include <eosiolib/multi_index.hpp>
 #include <eosiolib/public_key.hpp>
 
-#include "ram/exchange_state.cpp"
-
-#define USE_KECCAK
-#include "sha3/byte_order.c"
-#include "sha3/sha3.c"
-
-#include "abieos_numeric.hpp"
-#define uECC_SUPPORTS_secp160r1 0
-#define uECC_SUPPORTS_secp192r1 0
-#define uECC_SUPPORTS_secp224r1 0
-#define uECC_SUPPORTS_secp256r1 0
-#define uECC_SUPPORTS_secp256k1 1
-#define uECC_SUPPORT_COMPRESSED_POINT 1
-#include "ecc/uECC.c"
-
-#include "utils/snapshot.hpp"
-
 typedef std::string ethaddress;
 
 namespace celes {
@@ -61,7 +44,7 @@ static eosio::fixed_bytes<32> compute_ethaddress_key256(uint8_t* ethereum_key) {
         p32[0], p32[1], p32[2], p32[3], p32[4]);
 }
 
-struct [[ eosio::table, eosio::contract("celes::unregd") ]] address {
+struct [[ eosio::table, eosio::contract("celes.unregd") ]] address {
     uint64_t id;
     ethaddress ethaddress;
     eosio::asset balance;
@@ -80,7 +63,7 @@ typedef eosio::multi_index<
     addresses_index;
 
 //@abi table settings i64
-struct [[ eosio::table, eosio::contract("celes::unregd") ]] settings {
+struct [[ eosio::table, eosio::contract("celes.unregd") ]] settings {
     uint64_t id;
     eosio::asset max_eos_for_8k_of_ram;
 
@@ -89,7 +72,7 @@ struct [[ eosio::table, eosio::contract("celes::unregd") ]] settings {
 
 typedef eosio::multi_index<"settings"_n, settings> settings_index;
 
-class[[eosio::contract("celes::unregd")]] unregd : public eosio::contract {
+class[[eosio::contract("celes.unregd")]] unregd : public eosio::contract {
    public:
     constexpr static auto system_account = "celes"_n;
     constexpr static auto token_account = "celes.token"_n;
@@ -103,13 +86,14 @@ class[[eosio::contract("celes::unregd")]] unregd : public eosio::contract {
 
     unregd(eosio::name s, eosio::name code, eosio::datastream<const char*> ds);
 
-    // Actions
-    void add(const ethaddress& ethaddress, const eosio::asset& balance);
-    void regaccount(const std::vector<char>& signature,
-                    const std::string& account, const std::string& eos_pubkey);
-    void setmaxceles(const eosio::asset& maxeos);
-    void chngaddress(const ethaddress& old_address,
-                     const ethaddress& new_address);
+    [[eosio::action]] void add(const ethaddress& ethaddress,
+                               const eosio::asset& balance);
+    [[eosio::action]] void regaccount(const std::vector<char>& signature,
+                                      const std::string& account,
+                                      const std::string& eos_pubkey);
+    [[eosio::action]] void setmaxceles(const eosio::asset& maxeos);
+    [[eosio::action]] void chngaddress(const ethaddress& old_address,
+                                       const ethaddress& new_address);
 
    private:
     void update_address(const ethaddress& ethaddress,

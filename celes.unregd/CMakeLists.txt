@@ -7,10 +7,10 @@ add_contract(celes.unregd celes.unregd
    ${CMAKE_CURRENT_SOURCE_DIR}/src/celes.unregd.cpp
 )
    
-# target_include_directories(celes.unregd.wasm
-#    PUBLIC
-#    ${CMAKE_CURRENT_SOURCE_DIR}/include
-# )
+#target_include_directories(celes.unregd.wasm
+#   PUBLIC
+#   ${CMAKE_CURRENT_SOURCE_DIR}/include
+#)
 
 set_target_properties(celes.unregd.wasm
    PROPERTIES

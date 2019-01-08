@@ -32,9 +32,9 @@ struct wait_weight {
 
 struct authority {
     uint32_t threshold;
-    vector<key_weight> keys;
-    vector<permission_level_weight> accounts;
-    vector<wait_weight> waits;
+    std::vector<key_weight> keys;
+    std::vector<permission_level_weight> accounts;
+    std::vector<wait_weight> waits;
 
     // explicit serialization macro is not necessary, used here only to improve compilation time
     EOSLIB_SERIALIZE(authority, (threshold)(keys)(accounts)(waits))

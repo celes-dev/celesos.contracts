@@ -1,6 +1,22 @@
 #include "celes.unregd.hpp"
 #include <eosiolib/crypto.h>
+#include "ram/exchange_state.cpp"
 #include "utils/authority.hpp"
+
+#define USE_KECCAK
+#include "sha3/byte_order.c"
+#include "sha3/sha3.c"
+
+#include "abieos_numeric.hpp"
+#define uECC_SUPPORTS_secp160r1 0
+#define uECC_SUPPORTS_secp192r1 0
+#define uECC_SUPPORTS_secp224r1 0
+#define uECC_SUPPORTS_secp256r1 0
+#define uECC_SUPPORTS_secp256k1 1
+#define uECC_SUPPORT_COMPRESSED_POINT 1
+#include "ecc/uECC.c"
+
+#include "utils/snapshot.hpp"
 
 using celes::unregd;
 using celesos::rammarket;
