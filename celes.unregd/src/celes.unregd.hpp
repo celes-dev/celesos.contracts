@@ -61,7 +61,7 @@ static eosio::fixed_bytes<32> compute_ethaddress_key256(uint8_t* ethereum_key) {
         p32[0], p32[1], p32[2], p32[3], p32[4]);
 }
 
-struct [[ eosio::table, eosio::contract("eosio::unregd") ]] address {
+struct [[ eosio::table, eosio::contract("celes::unregd") ]] address {
     uint64_t id;
     ethaddress ethaddress;
     eosio::asset balance;
@@ -80,7 +80,7 @@ typedef eosio::multi_index<
     addresses_index;
 
 //@abi table settings i64
-struct [[ eosio::table, eosio::contract("eosio::unregd") ]] settings {
+struct [[ eosio::table, eosio::contract("celes::unregd") ]] settings {
     uint64_t id;
     eosio::asset max_eos_for_8k_of_ram;
 
@@ -89,7 +89,7 @@ struct [[ eosio::table, eosio::contract("eosio::unregd") ]] settings {
 
 typedef eosio::multi_index<"settings"_n, settings> settings_index;
 
-class[[eosio::contract("eosio::unregd")]] unregd : public eosio::contract {
+class[[eosio::contract("celes::unregd")]] unregd : public eosio::contract {
    public:
     constexpr static auto system_account = "celes"_n;
     constexpr static auto token_account = "celes.token"_n;
