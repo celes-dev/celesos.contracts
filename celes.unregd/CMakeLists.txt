@@ -4,7 +4,7 @@ project(eosio.unregd VERSION 1.0.0)
 find_package(celesos.cdt)
 
 add_contract(celes.unregd celes.unregd 
-   ${CMAKE_CURRENT_SOURCE_DIR}/eosio.unregd.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/celes.unregd.cpp
 )
    
 # target_include_directories(celes.unregd.wasm

@@ -1,23 +1,25 @@
-#include "eosio.unregd.hpp"
+#include "celes.unregd.hpp"
 #include <eosiolib/crypto.h>
 #include "utils/authority.hpp"
-using eosio::unregd;
-using eosiosystem::rammarket;
 
-EOSIO_DISPATCH(eosio::unregd, (add)(regaccount)(setmaxeos)(chngaddress))
+using celes::unregd;
+using celesos::rammarket;
+using eosio::action;
+using eosio::asset;
+using eosio::authority;
+using eosio::datastream;
+using eosio::name;
+using eosio::permission_level;
+using eosio::symbol;
+using eosio::symbol_code;
+using std::function;
+using std::string;
+using std::vector;
 
-symbol get_core_symbol(rammarket &market) {
-    static const auto ramcore_symbol = symbol{symbol_code{"RAMCODE"}, 4};
-    auto itr = market.find(ramcore_symbol.raw());
-    eosio_assert(itr != market.end(), "RAMCORE market not found");
-    return itr->quote.balance.symbol;
-}
-
-symbol get_core_symbol(const name system_account = "eosio"_n) {
-    rammarket market{system_account, system_account.value};
-    return get_core_symbol(market);
-}
-
+unregd::unregd(name s, name code, datastream<const char*> ds)
+    : eosio::contract{s, code, ds},
+      addresses(_self, _self.value),
+      settings(_self, _self.value) {}
 
 /**
  * Add a mapping between an ethaddress and an initial EOS token balance.
@@ -26,12 +28,13 @@ void unregd::add(const ethaddress& ethaddress, const asset& balance) {
     require_auth(_self);
 
     auto symbol = balance.symbol;
-    eosio_assert(symbol.is_valid() && symbol == get_core_symbol(), "balance must be EOS token");
+    eosio_assert(symbol.is_valid() && symbol == unregd::core_symbol,
+                 "balance must be EOS token");
 
     eosio_assert(ethaddress.length() == 42,
                  "Ethereum address should have exactly 42 characters");
 
-    update_address(ethaddress, [&](auto &address) {
+    update_address(ethaddress, [&](auto& address) {
         address.ethaddress = ethaddress;
         address.balance = balance;
     });
@@ -40,30 +43,34 @@ void unregd::add(const ethaddress& ethaddress, const asset& balance) {
 /**
  * Change the ethereum address that owns a balance
  */
-void unregd::chngaddress(const ethaddress& old_address, const ethaddress& new_address) {
+void unregd::chngaddress(const ethaddress& old_address,
+                         const ethaddress& new_address) {
     require_auth(_self);
 
-    eosio_assert(old_address.length() == 42, "Old Ethereum address should have exactly 42 characters");
-    eosio_assert(new_address.length() == 42, "New Ethereum address should have exactly 42 characters");
+    eosio_assert(old_address.length() == 42,
+                 "Old Ethereum address should have exactly 42 characters");
+    eosio_assert(new_address.length() == 42,
+                 "New Ethereum address should have exactly 42 characters");
 
     auto index = addresses.template get_index<"ethaddress"_n>();
     auto itr = index.find(compute_ethaddress_key256(old_address));
 
     eosio_assert(itr != index.end(), "Old Ethereum address not found");
 
-    index.modify(itr, _self, [&](auto& address) {
-        address.ethaddress = new_address;
-    });
+    index.modify(itr, _self,
+                 [&](auto& address) { address.ethaddress = new_address; });
 }
 
 /**
- * Sets the maximum amount of EOS this contract is willing to pay when creating a new account
+ * Sets the maximum amount of EOS this contract is willing to pay when creating
+ * a new account
  */
-void unregd::setmaxeos(const asset& maxeos) {
+void unregd::setmaxceles(const asset& maxeos) {
     require_auth(_self);
-    const auto core_symbol = get_core_symbol();
+    const auto core_symbol = unregd::core_symbol;
     auto symbol = maxeos.symbol;
-    eosio_assert(symbol.is_valid() && symbol == core_symbol, "maxeos invalid symbol");
+    eosio_assert(symbol.is_valid() && symbol == core_symbol,
+                 "maxeos invalid symbol");
 
     auto itr = settings.find(1);
     if (itr == settings.end()) {
@@ -72,16 +79,17 @@ void unregd::setmaxeos(const asset& maxeos) {
             s.max_eos_for_8k_of_ram = maxeos;
         });
     } else {
-        settings.modify(itr, _self, [&](auto& s) {
-            s.max_eos_for_8k_of_ram = maxeos;
-        });
+        settings.modify(itr, _self,
+                        [&](auto& s) { s.max_eos_for_8k_of_ram = maxeos; });
     }
 }
 
 /**
- * Register an EOS account using the stored information (address/balance) verifying an ETH signature
+ * Register an EOS account using the stored information (address/balance)
+ * verifying an ETH signature
  */
-void unregd::regaccount(const std::vector<char>& signature, const string& account, const string& eos_pubkey_str) {
+void unregd::regaccount(const vector<char>& signature, const string& account,
+                        const string& eos_pubkey_str) {
     eosio_assert(signature.size() == 66, "Invalid signature");
     eosio_assert(account.size() == 12, "Invalid account length");
 
@@ -96,18 +104,21 @@ void unregd::regaccount(const std::vector<char>& signature, const string& accoun
     // Verify that the account does not exists
     eosio_assert(!is_account(naccount), "Account already exists");
 
-    // Rebuild signed message based on current TX block num/prefix, pubkey and name
-    const abieos::public_key eos_pubkey = abieos::string_to_public_key(eos_pubkey_str);
+    // Rebuild signed message based on current TX block num/prefix, pubkey and
+    // name
+    const abieos::public_key eos_pubkey =
+        abieos::string_to_public_key(eos_pubkey_str);
 
     char tmpmsg[128];
     sprintf(tmpmsg, "%u,%u,%s,%s", tapos_block_num(), tapos_block_prefix(),
             eos_pubkey_str.c_str(), account.c_str());
 
-    //Add prefix and length of signed message
+    // Add prefix and length of signed message
     char message[128];
-    sprintf(message, "%s%s%d%s", "\x19", "Ethereum Signed Message:\n", strlen(tmpmsg), tmpmsg);
+    sprintf(message, "%s%s%d%s", "\x19", "Ethereum Signed Message:\n",
+            strlen(tmpmsg), tmpmsg);
 
-    //Calculate sha3 hash of message
+    // Calculate sha3 hash of message
     sha3_ctx shactx;
     capi_checksum256 msghash;
     rhash_keccak_256_init(&shactx);
@@ -117,12 +128,8 @@ void unregd::regaccount(const std::vector<char>& signature, const string& accoun
     // Recover compressed pubkey from signature
     uint8_t pubkey[64];
     uint8_t compressed_pubkey[34];
-    auto res = recover_key(
-        &msghash,
-        signature.data(),
-        signature.size(),
-        (char*)compressed_pubkey,
-        34);
+    auto res = recover_key(&msghash, signature.data(), signature.size(),
+                           (char*)compressed_pubkey, 34);
 
     eosio_assert(res == 34, "Recover key failed");
 
@@ -138,7 +145,8 @@ void unregd::regaccount(const std::vector<char>& signature, const string& accoun
     uint8_t eth_address[20];
     memcpy(eth_address, pubkeyhash.hash + 12, 20);
 
-    // Verify that the ETH address exists in the "addresses" eosio.unregd contract table
+    // Verify that the ETH address exists in the "addresses" eosio.unregd
+    // contract table
     addresses_index addresses(_self, _self.value);
     auto index = addresses.template get_index<"ethaddress"_n>();
 
@@ -148,10 +156,11 @@ void unregd::regaccount(const std::vector<char>& signature, const string& accoun
     // Split contribution balance into cpu/net/liquid
     auto balances = split_snapshot_abp(itr->balance);
     eosio_assert(balances.size() == 3, "Unable to split snapshot");
-    eosio_assert(itr->balance == balances[0] + balances[1] + balances[2], "internal error");
+    eosio_assert(itr->balance == balances[0] + balances[1] + balances[2],
+                 "internal error");
 
     // Get max EOS willing to spend for 8kb of RAM
-    asset max_eos_for_8k_of_ram = asset(0, get_core_symbol());
+    asset max_eos_for_8k_of_ram = asset{0, unregd::core_symbol};
     auto sitr = settings.find(1);
     if (sitr != settings.end()) {
         max_eos_for_8k_of_ram = sitr->max_eos_for_8k_of_ram;
@@ -159,33 +168,42 @@ void unregd::regaccount(const std::vector<char>& signature, const string& accoun
 
     // Calculate the amount of EOS to purchase 8k of RAM
     auto amount_to_purchase_8kb_of_RAM = buyrambytes(8 * 1024);
-    eosio_assert(amount_to_purchase_8kb_of_RAM <= max_eos_for_8k_of_ram, "price of RAM too high");
+    eosio_assert(amount_to_purchase_8kb_of_RAM <= max_eos_for_8k_of_ram,
+                 "price of RAM too high");
 
     // Build authority with the pubkey passed as parameter
     const auto auth = authority{
         1, {{{(uint8_t)eos_pubkey.type, eos_pubkey.data}, 1}}, {}, {}};
 
-    std::vector<permission_level> auths = {
-        permission_level{_self, "active"_n}};
+    std::vector<permission_level> auths = {permission_level{_self, "active"_n}};
     // Create account with the same key for owner/active
-    action{auths, "celes"_n, "newaccount"_n, std::make_tuple(_self, naccount, auth, auth)}.send();
+    action{auths, unregd::system_account, "newaccount"_n,
+           std::make_tuple(_self, naccount, auth, auth)}
+        .send();
 
     // Buy RAM for this account (8k)
-    action{auths, "celes.regram"_n, "buyram"_n, std::make_tuple(_self, naccount, amount_to_purchase_8kb_of_RAM)}.send();
+    action{auths, "celes.regram"_n, "buyram"_n,
+           std::make_tuple(_self, naccount, amount_to_purchase_8kb_of_RAM)}
+        .send();
 
     // Delegate bandwith
-    action{auths, "celes"_n, "delegatebw"_n, std::make_tuple(_self, naccount, balances[0], balances[1], 1)}.send();
+    action{auths, unregd::system_account, "delegatebw"_n,
+           std::make_tuple(_self, naccount, balances[0], balances[1], 1)}
+        .send();
 
     // Transfer remaining if any (liquid EOS)
     if (balances[2] != asset{}) {
-        action{auths, "celes.token"_n, "transfer"_n, std::make_tuple(_self, naccount, balances[2], "")}.send();
+        action{auths, unregd::token_account, "transfer"_n,
+               std::make_tuple(_self, naccount, balances[2], "")}
+            .send();
     }
 
     // Remove information for the ETH address from the eosio.unregd DB
     index.erase(itr);
 }
 
-void unregd::update_address(const ethaddress& ethaddress, const function<void(address&)> updater) {
+void unregd::update_address(const ethaddress& ethaddress,
+                            const function<void(address&)> updater) {
     auto index = addresses.template get_index<"ethaddress"_n>();
 
     auto itr = index.find(compute_ethaddress_key256(ethaddress));
@@ -198,3 +216,5 @@ void unregd::update_address(const ethaddress& ethaddress, const function<void(ad
         index.modify(itr, _self, [&](auto& address) { updater(address); });
     }
 }
+
+EOSIO_DISPATCH(celes::unregd, (add)(regaccount)(setmaxceles)(chngaddress))

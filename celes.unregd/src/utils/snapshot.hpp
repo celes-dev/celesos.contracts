@@ -1,15 +1,23 @@
 #pragma once
 
-namespace eosio {
+using eosio::asset;
+using eosio::name;
+using eosio::symbol;
+using eosio::symbol_code;
+using std::vector;
+
+namespace celes {
 
 asset buyrambytes(uint32_t bytes) {
-    eosiosystem::rammarket market{"eosio"_n, "eosio"_n.value};
-    auto ramcore_symbol = symbol{symbol_code{"RAMCODE"}, 4};
+    const static auto system_account = "celes"_n;
+    const static auto ramcore_symbol = symbol{symbol_code{"RAMCODE"}, 4};
+    const static auto ram_symbol = symbol{symbol_code{"RAM"}, 0};
+    const static auto core_symbol = symbol{symbol_code{"CELES"}, 4};
+
+    celesos::rammarket market{system_account, system_account.value};
     auto itr = market.find(ramcore_symbol.raw());
     eosio_assert(itr != market.end(), "RAMCORE market not found");
     auto tmp = *itr;
-    auto ram_symbol = symbol{symbol_code{"RAM"}, 0};
-    auto core_symbol = tmp.quote.balance.symbol;
     return tmp.convert(asset{bytes, ram_symbol}, core_symbol);
 }
 
@@ -63,4 +71,4 @@ vector<asset> split_snapshot_abp(const asset& balance) {
     return {split_net, split_cpu, floatingAmount};
 }
 
-}  // namespace eosio
+}  // namespace celes
