@@ -114,7 +114,7 @@ void system_contract::onblock(ignore<block_header>)
 
     ramattenuator();
 
-    if (!_gstate.is_dbp_active)
+    if (!_gstate.is_dbp_active && _gstate.is_network_active)
     {
         if (head_block_number - _gstate.network_active_block >= DBP_ACTIVE_SEP)
         {
