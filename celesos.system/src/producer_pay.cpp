@@ -119,6 +119,7 @@ void system_contract::onblock(ignore<block_header>)
         if (head_block_number - _gstate.network_active_block >= DBP_ACTIVE_SEP)
         {
             _gstate.is_dbp_active = true;
+            _gstate.dbp_active_block = get_chain_head_num();
         }
     }
 }
