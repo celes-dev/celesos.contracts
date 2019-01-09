@@ -451,9 +451,9 @@ double system_contract::calc_diff(uint32_t block_number)
     // (wood1*diff1*4+wood2*diff2*2+wood3*diff3)/7/M
     // 则建议难度值为wood1/M*diff1*4/7+wood1/M*diif2*2/7+wood1/M*diff3/7,简化为(wood1*diff1*4+wood2*diff2*2+wood3*diff3)/7/M
     double targetdiff = (wood1 * diff1 * 4 + wood2 * diff2 * 2 + wood3 * diff3) / TARGET_WOOD_NUMBER / 7;
-    if (targetdiff <= .1)
+    if (targetdiff <= 1.0)
     {
-        targetdiff = 0.1;
+        targetdiff = 1.0;
     }
 
     auto current = _burnblockstatinfos.find(block_number);
