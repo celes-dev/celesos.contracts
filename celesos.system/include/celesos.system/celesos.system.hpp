@@ -24,21 +24,20 @@
 
 // #ifdef DEBUG
 
-#define DAPP_PAY_UNACTIVE 15 * 10000
+#define TARGET_WOOD_NUMBER 300
 
-#define TARGET_WOOD_NUMBER 60
+#define DAPP_PAY_UNACTIVE 1000 * 10000
 // number of bp,BP个数
 #define BP_COUNT 9
 // when the bp count is ok cycle for this number,the active the network(主网启动条件，BP个数达标轮数）
-#define ACTIVE_NETWORK_CYCLE 3
+#define ACTIVE_NETWORK_CYCLE 24
 // reward get min（if smaller than this number，you can't get the reward）最小奖励领取数，低于此数字将领取失败
-#define REWARD_GET_MIN 50 * 10000
+#define REWARD_GET_MIN 1000000
 // get reward time sep(奖励领取间隔时间，单位：秒）
-#define REWARD_TIME_SEP 1 * 60 * uint64_t(1000000)
+#define REWARD_TIME_SEP 6 * 60 * 60 * uint64_t(1000000)
 // singing ticker sep（唱票间隔期，每隔固定时间进行唱票）
-#define SINGING_TICKER_SEP 1 * 2 * 6 * 10
-
-#define DBP_ACTIVE_SEP 300
+#define SINGING_TICKER_SEP BP_COUNT * 6 * 60
+#define DBP_ACTIVE_SEP 180 * 24 * 60 * 60 * 2
 
 // #else
 
