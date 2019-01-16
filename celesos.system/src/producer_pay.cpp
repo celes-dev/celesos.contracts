@@ -118,8 +118,7 @@ void system_contract::onblock(ignore<block_header>)
     {
         if (head_block_number - _gstate.network_active_block >= DBP_ACTIVE_SEP)
         {
-            _gstate.is_dbp_active = true;
-            _gstate.dbp_active_block = get_chain_head_num();
+            activedbp();
         }
     }
 }
@@ -306,6 +305,13 @@ void system_contract::activedbp()
     eosio_assert(_gstate.is_network_active, "network is not actived");
     _gstate.is_dbp_active = true;
     _gstate.dbp_active_block = get_chain_head_num();
+
+    asset dtoken_balance = celes::token::get_balance(token_account, dpay_account, core_symbol().code());
+    if (dtoken_balance.amount > 0)
+    {
+        INLINE_ACTION_SENDER(celes::token, transfer)
+        (token_account, {{dpay_account, active_permission}}, {dpay_account, dpaypool_account, asset(dtoken_balance.amount, core_symbol()), "dbp pay pool"});
+    }
 }
 
 } //namespace celesos
