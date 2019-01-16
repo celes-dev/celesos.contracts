@@ -37,7 +37,7 @@
 #define REWARD_TIME_SEP 6 * 60 * 60 * uint64_t(1000000)
 // singing ticker sep（唱票间隔期，每隔固定时间进行唱票）
 #define SINGING_TICKER_SEP BP_COUNT * 6 * 60
-#define DBP_ACTIVE_SEP 180 * 24 * 60 * 60 * 2
+#define DBP_ACTIVE_SEP 1 * 24 * 60 * 60 * 2
 
 // #else
 
