@@ -59,7 +59,7 @@ namespace celesos {
                                      (schedule_version)(new_producers))
    };
 
-   class [[eosio::contract("eosio.bios")]] bios : public eosio::contract {
+   class [[eosio::contract("celesos.bios")]] bios : public eosio::contract {
       public:
          using contract::contract;
          [[eosio::action]]
