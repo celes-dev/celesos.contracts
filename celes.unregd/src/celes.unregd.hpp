@@ -65,7 +65,7 @@ typedef eosio::multi_index<
 //@abi table settings i64
 struct [[ eosio::table, eosio::contract("celes.unregd") ]] settings {
     uint64_t id;
-    eosio::asset max_eos_for_8k_of_ram;
+    eosio::asset max_celes_for_8k_of_ram;
 
     uint64_t primary_key() const { return id; }
 };
@@ -76,9 +76,10 @@ class[[eosio::contract("celes.unregd")]] unregd : public eosio::contract {
    public:
     constexpr static auto system_account = "celes"_n;
     constexpr static auto token_account = "celes.token"_n;
+    constexpr static auto regram_account = "celes.regram"_n;
     constexpr static auto active_permission = "active"_n;
     constexpr static auto ramcore_symbol =
-        eosio::symbol{eosio::symbol_code{"RAMCODE"}, 4};
+        eosio::symbol{eosio::symbol_code{"RAMCORE"}, 4};
     constexpr static auto ram_symbol =
         eosio::symbol{eosio::symbol_code{"RAM"}, 0};
     constexpr static auto core_symbol =
@@ -90,8 +91,8 @@ class[[eosio::contract("celes.unregd")]] unregd : public eosio::contract {
                                const eosio::asset& balance);
     [[eosio::action]] void regaccount(const std::vector<char>& signature,
                                       const std::string& account,
-                                      const std::string& eos_pubkey);
-    [[eosio::action]] void setmaxceles(const eosio::asset& maxeos);
+                                      const std::string& celes_pubkey);
+    [[eosio::action]] void setmaxceles(const eosio::asset& maxceles);
     [[eosio::action]] void chngaddress(const ethaddress& old_address,
                                        const ethaddress& new_address);
 

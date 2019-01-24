@@ -10,7 +10,7 @@ namespace celes {
 
 asset buyrambytes(uint32_t bytes) {
     const static auto system_account = "celes"_n;
-    const static auto ramcore_symbol = symbol{symbol_code{"RAMCODE"}, 4};
+    const static auto ramcore_symbol = symbol{symbol_code{"RAMCORE"}, 4};
     const static auto ram_symbol = symbol{symbol_code{"RAM"}, 0};
     const static auto core_symbol = symbol{symbol_code{"CELES"}, 4};
 
