@@ -12,6 +12,7 @@ class[[eosio::contract("celesos.test")]] test : public eosio::contract
  public:
    using contract::contract;
 
+   [[eosio::action]] void helloworld();
    [[eosio::action]] void sayhello(eosio::name from, eosio::name to);
    [[eosio::action]] void blockrandom(const uint32_t block_number);
 };

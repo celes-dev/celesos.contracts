@@ -2,6 +2,10 @@
 
 namespace celesos {
 
+void test::helloworld() {
+
+}
+
 void test::sayhello(eosio::name from, eosio::name to) {
    eosio::print(from.to_string()," say hello to :",to.to_string());
 }
