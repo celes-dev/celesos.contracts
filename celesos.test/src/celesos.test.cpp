@@ -2,8 +2,8 @@
 
 namespace celesos {
 
-void test::helloworld() {
-
+void test::helloworld(uint32_t guest) {
+   
 }
 
 void test::sayhello(eosio::name from, eosio::name to) {
