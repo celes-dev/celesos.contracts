@@ -2,7 +2,7 @@
 
 namespace celesos {
 
-void test::helloworld(uint32_t guest) {
+void test::helloworld(eosio::name from) {
    
 }
 
