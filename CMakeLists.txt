@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
-project(eosio_contracts VERSION 1.5.2)
+project(celesos.contracts VERSION 0.9.0)
 
-set(CELESOS_CDT_VERSION_MIN "1.4")
-set(CELESOS_CDT_VERSION_SOFT_MAX "1.5")
+set(CELESOS_CDT_VERSION_MIN "0.9.0")
+set(CELESOS_CDT_VERSION_SOFT_MAX "1.0.0")
 #set(EOSIO_CDT_VERSION_HARD_MAX "")
 
 find_package(celesos.cdt)
