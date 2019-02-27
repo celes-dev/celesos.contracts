@@ -6,12 +6,7 @@
 
 namespace celesos
 {
-
-const uint32_t blocks_per_year = 52 * 7 * 24 * 2 * 3600; // half seconds per year
-const uint32_t blocks_per_day = 2 * 24 * 3600;
-const uint32_t blocks_per_hour = 2 * 3600;
 const int64_t useconds_per_day = 24 * 3600 * int64_t(1000000);
-const int64_t useconds_per_year = seconds_per_year * 1000000ll;
 
 void system_contract::onblock(ignore<block_header>)
 {
@@ -94,7 +89,7 @@ void system_contract::onblock(ignore<block_header>)
 
         if (_gstate.is_network_active)
         {
-            if ((timestamp.slot - _gstate.last_name_close.slot) > blocks_per_day)
+            if ((timestamp.slot - _gstate.last_name_close.slot) >= SINGING_TICKER_SEP * 6)
             {
                 name_bid_table bids(_self, _self.value);
                 auto idx = bids.get_index<"highbid"_n>();
