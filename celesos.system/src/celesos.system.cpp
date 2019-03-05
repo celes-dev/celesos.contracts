@@ -31,6 +31,7 @@ eosio_global_state system_contract::get_default_parameters()
 {
     eosio_global_state dp;
     get_blockchain_parameters(dp);
+    dp.last_ram_increase = current_block_time();
     return dp;
 }
 
