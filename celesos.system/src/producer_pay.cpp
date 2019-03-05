@@ -6,7 +6,7 @@
 
 namespace celesos
 {
-const int64_t useconds_per_day = 24 * 3600 * int64_t(1000000);
+const int64_t useconds_six_hour = 24 * 3600 * int64_t(1000000);
 
 void system_contract::onblock(ignore<block_header>)
 {
@@ -89,14 +89,14 @@ void system_contract::onblock(ignore<block_header>)
 
         if (_gstate.is_network_active)
         {
-            if ((timestamp.slot - _gstate.last_name_close.slot) >= SINGING_TICKER_SEP * 6)
+            if ((timestamp.slot - _gstate.last_name_close.slot) >= 6 * SINGING_TICKER_SEP)
             {
                 name_bid_table bids(_self, _self.value);
                 auto idx = bids.get_index<"highbid"_n>();
                 auto highest = idx.lower_bound(std::numeric_limits<uint64_t>::max() / 2);
                 if (highest != idx.end() &&
                     highest->high_bid > 0 &&
-                    (current_time_point() - highest->last_bid_time) > microseconds(useconds_per_day))
+                    (current_time_point() - highest->last_bid_time) > microseconds(useconds_six_hour))
                 {
                     _gstate.last_name_close = timestamp;
                     idx.modify(highest, eosio::same_payer, [&](auto &b) {
