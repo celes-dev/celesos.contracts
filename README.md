@@ -1,6 +1,6 @@
 # celes.contracts
 
-## Version : 0.9.0
+## Version : 1.0.0
 
 The design of the EOSIO blockchain calls for a number of smart contracts that are run at a privileged permission level in order to support functions such as block producer registration and voting, token staking for CPU and network bandwidth, RAM purchasing, multi-sig, etc.  These smart contracts are referred to as the system, token, msig and wrap (formerly known as sudo) contracts.
 
@@ -14,8 +14,8 @@ The following unprivileged contract(s) are also part of the system.
    * [celes.token](https://github.com/eosio/celes.contracts/tree/master/celes.token)
 
 Dependencies:
-* [celesos v0.9.0](https://github.com/celes-dev/celesos/releases/tag/v0.9.0)
-* [celesos.cdt v0.9.0](https://github.com/celes-dev/celesos/releases/tag/v0.9.0)
+* [celesos v1.0.0](https://github.com/celes-dev/celesos/releases/tag/v1.0.0)
+* [celesos.cdt v1.0.0](https://github.com/celes-dev/celesos/releases/tag/v1.0.0)
 
 To build the contracts and the unit tests:
 * First, ensure that your __celesos__ is compiled to the core symbol for the EOSIO blockchain that intend to deploy to.
