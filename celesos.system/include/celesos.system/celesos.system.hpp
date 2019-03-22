@@ -445,6 +445,8 @@ class [[eosio::contract("celesos.system")]] system_contract : public native
 
     [[eosio::action]] void activedbp();
 
+    [[eosio::action]] void setnamelist(uint8_t list_type, uint8_t action_type, const std::vector<name>& namelist );
+
   private:
     // Implementation details:
 

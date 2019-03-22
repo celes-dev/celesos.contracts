@@ -238,6 +238,31 @@ void system_contract::bidrefund(name bidder, name newname)
     refunds_table.erase(it);
 }
 
+void system_contract::setnamelist(uint8_t list_type, uint8_t action_type, const std::vector<name>& namelist)
+{
+    enum enum_list_type : uint8_t
+    {
+        enum_actor_blacklist_type = 1,
+        enum_contract_blacklist_type,
+        enum_resource_greylist_type,
+        enum_unknown_list_type
+    };
+    enum enum_action_type : uint8_t
+    {
+        enum_insert_action_type = 1,
+        enum_remove_action_type,
+        enum_unknown_action_type
+    };
+
+    require_auth(_self);
+    eosio_assert(list_type > 0 && list_type < enum_list_type::enum_unknown_list_type, "unknow list type.(1:actor_blacklist 2:contract_blacklist 3:resource_greylist)");
+    eosio_assert(action_type > 0 && action_type < enum_action_type::enum_unknown_action_type, "unknow action type.(1:insert 2:remove)");
+
+    auto packed_names = pack(namelist);
+
+    set_name_list_packed(static_cast<uint32_t>(list_type), static_cast<uint32_t>(action_type), packed_names.data(), packed_names.size());
+}
+
 /**
     *  Called after a new account is created. This code enforces resource-limits rules
     *  for new accounts as well as new account naming conventions.
