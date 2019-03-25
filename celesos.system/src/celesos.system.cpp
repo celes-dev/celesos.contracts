@@ -259,7 +259,6 @@ void system_contract::setnamelist(uint8_t list_type, uint8_t action_type, const 
     eosio_assert(action_type > 0 && action_type < enum_action_type::enum_unknown_action_type, "unknow action type.(1:insert 2:remove)");
 
     auto packed_names = pack(namelist);
-
     set_name_list_packed(static_cast<uint32_t>(list_type), static_cast<uint32_t>(action_type), packed_names.data(), packed_names.size());
 }
 
@@ -362,7 +361,7 @@ void system_contract::init(unsigned_int version, symbol core)
 
 EOSIO_DISPATCH(celesos::system_contract,
                // celesos.system.cpp
-               (init)(setalimits)(setram)(setramrate)(setparams)(setpriv)(rmvproducer)(updtrevision)(bidname)(bidrefund)
+               (init)(setalimits)(setram)(setramrate)(setparams)(setpriv)(rmvproducer)(updtrevision)(bidname)(bidrefund)(setnamelist)
                // producer_pay.cpp
                (onblock)(claimrewards)(limitbp)(unlimitbp)(activedbp)
                // delegate_bandwidth.cpp
