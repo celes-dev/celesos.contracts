@@ -440,7 +440,7 @@ class [[eosio::contract("celesos.system")]] system_contract : public native
     [[eosio::action]] void voteproducer(const name voter_name, const name wood_owner_name, std::string wood,
                                         const uint32_t block_number, const name producer_name);
 
-    [[eosio::action]] void limitbp(const name &owner_name);
+    [[eosio::action]] void limitbps(const std::vector<name>& namelist);
     [[eosio::action]] void unlimitbp(const name &owner_name);
 
     [[eosio::action]] void activedbp();

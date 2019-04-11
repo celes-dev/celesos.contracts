@@ -363,7 +363,7 @@ EOSIO_DISPATCH(celesos::system_contract,
                // celesos.system.cpp
                (init)(setalimits)(setram)(setramrate)(setparams)(setpriv)(rmvproducer)(updtrevision)(bidname)(bidrefund)(setnamelist)
                // producer_pay.cpp
-               (onblock)(claimrewards)(limitbp)(unlimitbp)(activedbp)
+               (onblock)(claimrewards)(limitbps)(unlimitbp)(activedbp)
                // delegate_bandwidth.cpp
                (delegatebw)(undelegatebw)(buyrambytes)(buyram)(sellram)(refund)
                // voting.cpp

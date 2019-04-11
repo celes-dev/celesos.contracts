@@ -3,15 +3,22 @@
 #include <eosiolib/ignore.hpp>
 #include <eosiolib/transaction.hpp>
 
+#include <eosiolib/asset.hpp>
+// #include <eosiolib/eosio.hpp>
+
+#include <string>
+
+#include <string>
+
 namespace celesos {
 
    class [[eosio::contract("celesos.msig")]] multisig : public eosio::contract {
       public:
          using contract::contract;
 
-         [[eosio::action]]
+         [[eosio::action]] 
          void propose(eosio::ignore<eosio::name> proposer, eosio::ignore<eosio::name> proposal_name,
-               eosio::ignore<std::vector<eosio::permission_level>> requested, eosio::ignore<eosio::transaction> trx);
+                                        eosio::ignore<std::vector<eosio::permission_level>> requested, eosio::ignore<eosio::transaction> trx, eosio::ignore<std::string> memo);
          [[eosio::action]]
          void approve( eosio::name proposer, eosio::name proposal_name, eosio::permission_level level,
                        const eosio::binary_extension<eosio::checksum256>& proposal_hash );

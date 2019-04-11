@@ -253,25 +253,28 @@ void system_contract::claimrewards(const name owner)
             _dbpunishs.erase(bppunish_info);
         }
     }
-} // namespace celesos
+}
 
-void system_contract::limitbp(const name &owner_name)
+void system_contract::limitbps(const std::vector<name> &namelist)
 {
     require_auth(_self);
-    auto bppunish_info = _dbpunishs.find(owner_name.value);
-    if (bppunish_info == _dbpunishs.end())
+    for (auto &owner_name : namelist)
     {
-        _dbpunishs.emplace(_self, [&](auto &s) {
-            s.owner = owner_name;
-            s.punish_count = 1;
-        });
+        auto bppunish_info = _dbpunishs.find(owner_name.value);
+        if (bppunish_info == _dbpunishs.end())
+        {
+            _dbpunishs.emplace(_self, [&](auto &s) {
+                s.owner = owner_name;
+                s.punish_count = 1;
+            });
+        }
+        else
+        {
+            _dbpunishs.modify(bppunish_info, eosio::same_payer, [&](bp_punish_info &info) {
+                info.punish_count = info.punish_count + 1;
+            });
+        };
     }
-    else
-    {
-        _dbpunishs.modify(bppunish_info, eosio::same_payer, [&](bp_punish_info &info) {
-            info.punish_count = info.punish_count + 1;
-        });
-    };
 }
 
 void system_contract::unlimitbp(const name &owner_name)
