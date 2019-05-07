@@ -138,6 +138,8 @@ void multisig::unapprove(eosio::name proposer, eosio::name proposal_name, eosio:
    eosio_assert(itr != apps_it.requested_approvals.end(), "approval is not on the list of requested approvals");
 
    apptable.modify(apps_it, proposer, [&](auto &a) {
+      a.disagree_approvals.push_back(approval{level, current_time_point()});
+
       {
          auto temp = std::find_if(a.agree_approvals.begin(), a.agree_approvals.end(), [&](const approval &a) { return a.level == level; });
          if (temp != a.agree_approvals.end())
@@ -153,8 +155,6 @@ void multisig::unapprove(eosio::name proposer, eosio::name proposal_name, eosio:
             a.abstain_approvals.erase(temp);
          }
       }
-
-      a.disagree_approvals.push_back(approval{level, current_time_point()});
    });
 }
 
@@ -268,7 +268,6 @@ void multisig::exec(eosio::name proposer, eosio::name proposal_name, eosio::name
    }
 
    proptable.erase(prop);
-
    apptable.erase(apps_it);
 }
 
