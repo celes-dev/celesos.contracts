@@ -317,6 +317,24 @@ void native::newaccount(name creator,
     set_resource_limits(newact.value, 0, 0, 0);
 }
 
+ ///CELES CODE CUICHAO
+void  native::linkauth(name account,
+                            name code,
+                            name type,
+                            name requirement) {
+
+    eosio::name active_permission{"active"_n};
+    eosio::name supervision{"supervision"_n}; 
+
+
+    action(
+            permission_level{ account, active_permission },
+            code,supervision,
+            std::make_tuple(account,code,type,requirement)
+    ).send();
+}
+//}
+
 void native::setabi(name acnt, const std::vector<char> &abi)
 {
     eosio::multi_index<"abihash"_n, abi_hash> table(_self, _self.value);

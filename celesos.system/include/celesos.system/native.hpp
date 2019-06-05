@@ -114,10 +114,10 @@ class[[eosio::contract("celesos.system")]] native : public eosio::contract
    [[eosio::action]] void deleteauth(ignore<name> account,
                                      ignore<name> permission) {}
 
-   [[eosio::action]] void linkauth(ignore<name> account,
-                                   ignore<name> code,
-                                   ignore<name> type,
-                                   ignore<name> requirement) {}
+   [[eosio::action]] void linkauth(name account,
+                                   name code,
+                                   name type,
+                                   name requirement);
 
    [[eosio::action]] void unlinkauth(ignore<name> account,
                                      ignore<name> code,
