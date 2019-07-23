@@ -307,15 +307,21 @@ namespace celesossystem {
                         ignore<name> type,
                         ignore<name> requirement  ) {
 
+      eosio::name _account;
+      eosio::name _code;
+      eosio::name _type;
+      eosio::name _requirement;
+
+      _ds >> _account >> _code >> _type >> _requirement;
+
       constexpr static auto supervision = "supervision"_n; 
       constexpr static auto active_permission = "active"_n;
-      eosio::name account1 = account;
 
       eosio::action(
-         permission_level{ account1, active_permission },
-         code,
+         permission_level{ _account, active_permission },
+         _code,
          supervision,
-         std::make_tuple(account,code,type,requirement)
+         std::make_tuple(_account, _code, _type, _requirement)
       ).send();
    }
 
