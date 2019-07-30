@@ -19,7 +19,6 @@ set(VOTING_ICON_URI   "voting.png#db28cd3db6e62d4509af3644ce7d377329482a14bb4bfa
 add_subdirectory(celesos.bios)
 add_subdirectory(celes.token)
 add_subdirectory(celesos.msig)
-# add_subdirectory(celesos.system)
 add_subdirectory(celesos.wrap)
-# add_subdirectory(celesos.system)
 add_subdirectory(celesos.system)
+add_subdirectory(celesos.test)

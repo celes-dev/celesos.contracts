@@ -18,7 +18,7 @@ void system_contract::onblock(ignore<block_header>)
 
     require_auth(get_self());
 
-    uint32_t head_block_number = get_chain_head_num();
+    uint32_t head_block_number = eosio::internal_use_do_not_use::get_chain_head_num();
 
     if (_gstate.is_network_active)
     {
@@ -303,7 +303,7 @@ void system_contract::activedbp()
     check(!_gstate.is_dbp_active, "dbp is actived");
     check(_gstate.is_network_active, "network is not actived");
     _gstate.is_dbp_active = true;
-    _gstate.dbp_active_block = get_chain_head_num();
+    _gstate.dbp_active_block = eosio::internal_use_do_not_use::get_chain_head_num();
 
     asset dtoken_balance = celes::token::get_balance(token_account, dpay_account, core_symbol().code());
     if (dtoken_balance.amount > 0)

@@ -211,7 +211,7 @@ void multisig::exec( eosio::name proposer, eosio::name proposal_name, eosio::nam
    send_deferred( (uint128_t(proposer.value) << 64) | proposal_name.value, executer,
                   prop.packed_transaction.data(), prop.packed_transaction.size() );
 
-   if (eosio::is_systemaccount_transaction((char *)prop.packed_transaction.data(), prop.packed_transaction.size()))
+   if (eosio::internal_use_do_not_use::is_systemaccount_transaction((char *)prop.packed_transaction.data(), prop.packed_transaction.size()))
    {
       std::vector<eosio::permission_level> this_punishs;
 
