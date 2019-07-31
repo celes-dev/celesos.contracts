@@ -36,7 +36,7 @@
 
 #define DAPP_PAY_UNACTIVE 1000 * 10000
 // number of bp,BP个数
-#define BP_COUNT 21
+#define BP_COUNT 6
 // when the bp count is ok cycle for this number,the active the network(主网启动条件，BP个数达标轮数）
 #define ACTIVE_NETWORK_CYCLE 24
 // reward get min（if smaller than this number，you can't get the reward）最小奖励领取数，低于此数字将领取失败
