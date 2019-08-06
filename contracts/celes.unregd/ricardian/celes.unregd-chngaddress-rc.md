@@ -1,4 +1,4 @@
-## ACTION eosio::name : change_address
+## ACTION NAME : change_address
 
 ### Description
 

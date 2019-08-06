@@ -1,4 +1,4 @@
-## ACTION eosio::name : setmaxceles
+## ACTION NAME : setmaxceles
 
 ## Description
 

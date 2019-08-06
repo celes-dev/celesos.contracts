@@ -12,6 +12,6 @@ add_contract(celes.unregd celes.unregd
 #   ${CMAKE_CURRENT_SOURCE_DIR}/include
 #)
 
-set_target_properties(celes.unregd.wasm
+set_target_properties(celes.unregd
    PROPERTIES
    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")

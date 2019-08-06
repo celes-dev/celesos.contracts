@@ -20,7 +20,7 @@ typedef unsigned __int32 uint32_t;
 typedef unsigned __int64 uint64_t;
 #endif /* _MSC_VER >= 1600 */
 
-/* disable warnings: The POSIX eosio::name for this item is deprecated. Use the ISO C++
+/* disable warnings: The POSIX name for this item is deprecated. Use the ISO C++
  * conformant name. */
 #pragma warning(disable : 4996)
 

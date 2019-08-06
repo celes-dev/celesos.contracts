@@ -53,7 +53,7 @@ namespace abieos {
         std::array<char, 33> data{};
     };
 
-    template<typeeosio::name Key, int suffix_size>
+    template<typename Key, int suffix_size>
     Key string_to_key(std::string_view s, key_type type,
                       const char (&suffix)[suffix_size]) {
         static const auto size = std::tuple_size<decltype(Key::data)>::value;

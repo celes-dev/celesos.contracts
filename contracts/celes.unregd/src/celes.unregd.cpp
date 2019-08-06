@@ -37,7 +37,7 @@ using std::function;
 using std::string;
 using std::vector;
 
-unregd::unregd(eosio::name s, eosio::name code, datastream<const char *> ds)
+unregd::unregd(name s, name code, datastream<const char *> ds)
         : eosio::contract{s, code, ds},
           addresses(_self, _self.value),
           settings(_self, _self.value) {}
@@ -114,7 +114,7 @@ void unregd::regaccount(const vector<char> &signature, const string &account,
     eosio_assert(signature.size() == 66, "Invalid signature");
     eosio_assert(account.size() == 12, "Invalid account length");
 
-    // Verify that the destination account eosio::name is valid
+    // Verify that the destination account name is valid
     for (const auto &c : account) {
         if (!((c >= 'a' && c <= 'z') || (c >= '1' && c <= '5')))
             eosio_assert(false, "Invalid account name");
@@ -141,7 +141,7 @@ void unregd::regaccount(const vector<char> &signature, const string &account,
 
     // Calculate sha3 hash of message
     sha3_ctx shactx;
-    eosio::checksum256  msghash;
+    capi_checksum256 msghash;
     rhash_keccak_256_init(&shactx);
     rhash_keccak_update(&shactx, (const uint8_t *) message, strlen(message));
     rhash_keccak_final(&shactx, msghash.hash);
@@ -158,7 +158,7 @@ void unregd::regaccount(const vector<char> &signature, const string &account,
     uECC_decompress(compressed_pubkey + 1, pubkey, uECC_secp256k1());
 
     // Calculate ETH address based on decompressed pubkey
-    eosio::checksum256  pubkeyhash;
+    capi_checksum256 pubkeyhash;
     rhash_keccak_256_init(&shactx);
     rhash_keccak_update(&shactx, pubkey, 64);
     rhash_keccak_final(&shactx, pubkeyhash.hash);

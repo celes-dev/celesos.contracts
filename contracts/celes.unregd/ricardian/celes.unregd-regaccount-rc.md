@@ -1,4 +1,4 @@
-## ACTION eosio::name : regaccount
+## ACTION NAME : regaccount
 
 ### Description
 
