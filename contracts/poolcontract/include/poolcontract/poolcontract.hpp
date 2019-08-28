@@ -33,7 +33,7 @@ namespace celesos
 
   struct [[eosio::table]] s_stake {
             eosio::name                   s_stake_name;
-            eosio::asset                         s_stake_amount;
+            eosio::asset                  s_stake_amount;
             uint32_t                      s_settlement;
 
             uint64_t primary_key()const { return s_stake_name.value; }

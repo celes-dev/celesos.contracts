@@ -23,7 +23,6 @@ namespace celesos {
       using namespace eosio;
       
       eosio::internal_use_do_not_use::eosio_assert(_stake_gstate.all_reward.amount > 0, "poolcontract reward amount is 0!");
-      eosio::print(" ---0-- ");
       uint32_t current_block_number = eosio::internal_use_do_not_use::get_chain_head_num();
       if(current_block_number - _stake_gstate.last_settlement > 0)
       {
@@ -35,15 +34,20 @@ namespace celesos {
          uint64_t increased_reward = (uint64_t)((ALL_REWARD/2/HALF_LIFT_PERIOD)*(current_block_number - _stake_gstate.last_settlement)*pow(0.5,half_life_period));
          _stake_gstate.all_unreceived_reward += eosio::asset(increased_reward, core_symbol);
       }
-
-      s_stake_table single_stake(from, from.value);
+      
+      s_stake_table single_stake(get_self(), from.value);
       auto single = single_stake.find( from.value );
-      uint64_t reward = (uint64_t)(single->s_stake_amount.amount*(current_block_number - single->s_settlement)/(_stake_gstate.all_stake.amount*_stake_gstate.all_coefficient));
+      if(single->s_stake_amount.amount == 0)
+      {
+         eosio::print(" ---reward is 0!-- ");
+         return eosio::asset(0, core_symbol);
+      }
+      uint64_t reward = (uint64_t)((single->s_stake_amount.amount*(current_block_number - single->s_settlement))/(_stake_gstate.all_stake.amount*_stake_gstate.all_coefficient));
       _stake_gstate.all_unreceived_reward -= eosio::asset(reward, core_symbol);
       _stake_gstate.all_reward -= eosio::asset(reward, core_symbol);
       _stake_gstate.last_settlement = current_block_number;
 
-      return eosio::asset(reward, core_symbol);;
+      return eosio::asset(reward, core_symbol);
    }
 
    void stake::staketoken(const eosio::asset& quantity,eosio::name from) {
@@ -71,13 +75,15 @@ namespace celesos {
                {get_self(),from, reward_value, ""});
          }
 
-         s_stake_table single_stake(from, from.value);
+         s_stake_table single_stake(get_self(), from.value);
          auto single = single_stake.find( from.value );
          if( single == single_stake.end() ) {
             single_stake.emplace( from, [&]( auto& a ){
-               a.s_stake_amount += quantity;
+               //first time s_stake_amount is  quantity
+               a.s_stake_amount = quantity;
                a.s_settlement = current_block_number;
             });
+            eosio::print(" ------qqqqqqqq-- ");
          } else {
             single_stake.modify( single, from, [&]( auto& a ) {
                a.s_stake_amount += quantity;
@@ -85,6 +91,7 @@ namespace celesos {
             });
          }
          _stake_gstate.all_stake += quantity;
+         
       }
    }
 
@@ -92,7 +99,7 @@ namespace celesos {
       require_auth( to );
       eosio::internal_use_do_not_use::eosio_assert(quantity.symbol == core_symbol, "unexpected asset symbol input");
       eosio::internal_use_do_not_use::eosio_assert(_stake_gstate.last_settlement > 0, "stake contract not init!");
-      s_stake_table single_stake(to, to.value);
+      s_stake_table single_stake(get_self(), to.value);
       auto single = single_stake.find( to.value );
       eosio::internal_use_do_not_use::eosio_assert(single != single_stake.end(), "stake infomation table is not exist!");
       eosio::internal_use_do_not_use::eosio_assert(quantity <= single->s_stake_amount, "unstake amount is bigger than stake amount!");
@@ -126,7 +133,6 @@ namespace celesos {
    extern "C"
    {
       [[noreturn]] void apply(uint64_t receiver, uint64_t code, uint64_t action) {
-         eosio::print("apply called!!!");
          constexpr static auto token_account = "celes.token"_n;
          constexpr static auto action_name = "transfer"_n;
          if ((eosio::name(code) == token_account) && (eosio::name(action) == action_name))
