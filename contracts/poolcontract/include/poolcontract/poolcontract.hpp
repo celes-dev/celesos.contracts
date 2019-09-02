@@ -7,6 +7,7 @@
 #include <eosio/asset.hpp>
 #include<eosio/system.hpp>
 #include <cmath>
+#include <eosio/transaction.hpp>
 
 namespace celesos
 {
