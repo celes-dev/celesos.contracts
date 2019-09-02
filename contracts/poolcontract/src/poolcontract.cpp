@@ -50,6 +50,9 @@ namespace celesos {
 
    void stake::staketoken(const eosio::asset& quantity,eosio::name from) {
       require_auth( from );
+      eosio::check( quantity.is_valid(), "invalid quantity" );
+      eosio::check( quantity.amount > 0, "must retire positive quantity" );
+      eosio::check( quantity.symbol == core_symbol, "transfer token symbol is not CELES" );
 
       uint32_t current_block_number = eosio::internal_use_do_not_use::get_chain_head_num();
       if(_stake_gstate.last_settlement == 0)
