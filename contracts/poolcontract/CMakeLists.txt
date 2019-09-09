@@ -2,7 +2,8 @@ add_contract(poolcontract poolcontract ${CMAKE_CURRENT_SOURCE_DIR}/src/poolcontr
 
 target_include_directories(poolcontract
    PUBLIC
-   ${CMAKE_CURRENT_SOURCE_DIR}/include)
+   ${CMAKE_CURRENT_SOURCE_DIR}/include
+   ${CMAKE_CURRENT_SOURCE_DIR}/../celes.token/include)
 
 set_target_properties(poolcontract
    PROPERTIES

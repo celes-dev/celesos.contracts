@@ -1,5 +1,5 @@
 #include <poolcontract/poolcontract.hpp>
-#include "inline_helper.hpp"
+#include <celes.token/celes.token.hpp>
 
 #define ALL_REWARD 10000000
 #define HALF_LIFT_PERIOD 8000000
@@ -72,9 +72,8 @@ namespace celesos {
          {
             eosio::print("    transfer reward ",reward_value);
             eosio::print(" to ",from);
-            INLINE_ACTION_SENDER(celes::stakecall::token, transfer)
-            ("celes.token"_n, {{get_self(), "active"_n}},
-               {get_self(),from, reward_value, ""});
+            celes::token::transfer_action transfer_act{ token_account, { {get_self(), active_permission}} };
+            transfer_act.send(get_self(), from, reward_value, "reward");
          }
 
          s_stake_table single_stake(get_self(), from.value);
@@ -112,9 +111,8 @@ namespace celesos {
       {
          eosio::print("    transfer reward ",reward_value);
          eosio::print(" to ",to);
-         INLINE_ACTION_SENDER(celes::stakecall::token, transfer)
-         ("celes.token"_n, {{get_self(), "active"_n}},
-            {get_self(),to, reward_value, ""});
+         celes::token::transfer_action transfer_act{ token_account, { {get_self(), active_permission}} };
+         transfer_act.send(get_self(), to, reward_value, "");
       }
 
 
