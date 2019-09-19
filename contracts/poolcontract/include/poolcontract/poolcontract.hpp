@@ -57,6 +57,9 @@ namespace celesos
       static constexpr eosio::name token_account{"celes.token"_n};
       static constexpr eosio::symbol core_symbol = eosio::symbol{eosio::symbol_code{"CELES"}, 4};
 
+      stake( eosio::name s, eosio::name code, eosio::datastream<const char*> ds );
+      ~stake();
+
       [[eosio::action]]
       void staketoken(const eosio::asset& quantity,eosio::name from);
 
